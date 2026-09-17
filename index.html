@@ -1,0 +1,2652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PESHI — Office Management Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F3EC; --bg-alt:#EEE8D9; --surface:#FFFFFF;
+  --ink:#241F16; --ink-soft:#645C49; --ink-faint:#8C846E;
+  --border:#DCD3BC; --border-soft:#EAE3D2;
+  --navy:#1C3A52; --navy-dark:#122736; --navy-tint:#E4EBEF;
+  --marigold:#BD7A22; --marigold-dark:#8F5D18; --marigold-tint:#F4E4C6;
+  --green:#2E6B47; --green-tint:#DEEBE1;
+  --red:#A63A2A; --red-tint:#F5DFD8;
+  --purple:#5B4B8A; --purple-tint:#E9E4F3;
+  --radius-s:3px; --radius-m:6px;
+  --font-serif:'IBM Plex Serif',serif; --font-sans:'IBM Plex Sans','Noto Sans Telugu',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+  --shadow-1: 0 1px 2px rgba(28,22,10,0.08); --shadow-2: 0 6px 20px rgba(28,22,10,0.14);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;font-family:var(--font-sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;}
+::selection{background:var(--marigold-tint);}
+a{color:var(--navy);}
+:focus-visible{outline:2px solid var(--marigold-dark);outline-offset:2px;}
+.hidden{display:none !important;}
+.small{font-size:.78rem;color:var(--ink-soft);}
+.muted{color:var(--ink-faint);}
+.mono{font-family:var(--font-mono);}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;letter-spacing:.01em;padding:2px 9px;border-radius:100px;line-height:1.6;border:1px solid transparent;}
+.badge-amber{background:var(--marigold-tint);color:var(--marigold-dark);}
+.badge-green{background:var(--green-tint);color:var(--green);}
+.badge-red{background:var(--red-tint);color:var(--red);}
+.badge-navy{background:var(--navy-tint);color:var(--navy);}
+.badge-purple{background:var(--purple-tint);color:var(--purple);}
+.badge-grey{background:var(--border-soft);color:var(--ink-soft);}
+
+/* ---------- login ---------- */
+#screen-login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 20px;
+  background:radial-gradient(circle at 15% 20%, rgba(189,122,34,0.07), transparent 45%),radial-gradient(circle at 85% 80%, rgba(28,58,82,0.08), transparent 45%),var(--bg);}
+.login-card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);box-shadow:var(--shadow-2);overflow:hidden;}
+.login-letterhead{background:var(--navy);color:#fff;padding:22px 28px 18px;border-bottom:4px solid var(--marigold);}
+.login-emblem{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.65);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-weight:700;font-size:.85rem;margin-bottom:10px;}
+.login-letterhead .dept{font-family:var(--font-serif);font-size:1.02rem;font-weight:600;line-height:1.35;}
+.login-letterhead .sub{font-size:.74rem;color:rgba(255,255,255,.72);margin-top:3px;letter-spacing:.02em;}
+.login-body{padding:26px 28px 28px;}
+.login-title{font-family:var(--font-serif);font-size:1.3rem;font-weight:600;margin:0 0 4px;}
+.login-desc{font-size:.83rem;color:var(--ink-soft);margin:0 0 20px;line-height:1.5;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:.76rem;font-weight:600;color:var(--ink-soft);margin-bottom:5px;letter-spacing:.01em;}
+.field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--radius-s);background:var(--bg);font-size:.88rem;font-family:inherit;color:var(--ink);}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy);background:#fff;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:var(--radius-s);font-size:.85rem;font-weight:600;cursor:pointer;border:1px solid transparent;transition:filter .12s ease, transform .05s ease;}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--navy);color:#fff;}
+.btn-primary:hover{filter:brightness(1.12);}
+.btn-marigold{background:var(--marigold);color:#fff;}
+.btn-marigold:hover{filter:brightness(1.08);}
+.btn-ghost{background:transparent;color:var(--navy);border-color:var(--border);}
+.btn-ghost:hover{background:var(--navy-tint);}
+.btn-danger{background:transparent;color:var(--red);border-color:var(--red-tint);}
+.btn-danger:hover{background:var(--red-tint);}
+.btn-block{width:100%;}
+.btn-sm{padding:5px 10px;font-size:.76rem;}
+.login-demo{margin-top:16px;padding:10px 12px;background:var(--bg-alt);border:1px dashed var(--border);border-radius:var(--radius-s);font-size:.74rem;color:var(--ink-soft);line-height:1.5;}
+.login-demo b{color:var(--ink);}
+.login-foot{text-align:center;font-size:.7rem;color:var(--ink-faint);padding:14px 20px 20px;}
+
+/* ---------- app shell ---------- */
+.app-shell{display:flex;min-height:100vh;}
+.sidebar{width:236px;flex:0 0 236px;background:var(--navy-dark);color:#EFE9DA;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+.hamburger-btn{display:none;background:none;border:none;font-size:1.15rem;color:var(--ink);cursor:pointer;padding:4px 8px 4px 0;margin-right:6px;}
+.sidebar-backdrop{display:none;}
+.sidebar-head{padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.1);}
+.sidebar-head .wordmark{font-family:var(--font-serif);font-weight:700;font-size:1.25rem;color:#fff;letter-spacing:.01em;}
+.sidebar-head .wordmark span{color:var(--marigold);}
+.sidebar-head .dept-line{font-size:.66rem;color:rgba(239,233,218,.62);margin-top:5px;line-height:1.5;}
+.nav-group{padding:10px 10px;overflow-y:auto;flex:1;}
+.nav-label{font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(239,233,218,.4);padding:14px 10px 6px;font-weight:600;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-s);font-size:.83rem;color:rgba(239,233,218,.86);cursor:pointer;margin-bottom:2px;border-left:3px solid transparent;}
+.nav-item:hover{background:rgba(255,255,255,.06);}
+.nav-item.active{background:rgba(189,122,34,.18);border-left-color:var(--marigold);color:#fff;font-weight:600;}
+.nav-item .ic{width:17px;text-align:center;font-size:.9rem;flex:0 0 auto;}
+.nav-item .count{margin-left:auto;font-size:.68rem;background:rgba(255,255,255,.12);padding:1px 7px;border-radius:100px;font-family:var(--font-mono);}
+.nav-item.count-alert .count{background:var(--marigold);color:#fff;}
+.sidebar-foot{padding:12px 14px 16px;border-top:1px solid rgba(255,255,255,.1);font-size:.76rem;}
+.sidebar-user{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+.sidebar-user .avatar{width:30px;height:30px;border-radius:50%;background:var(--marigold);color:#fff;font-weight:700;font-size:.78rem;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.sidebar-user .who .name{color:#fff;font-weight:600;font-size:.8rem;}
+.sidebar-user .who .role{color:rgba(239,233,218,.55);font-size:.68rem;}
+.sidebar-foot .signout{color:rgba(239,233,218,.7);cursor:pointer;font-size:.74rem;}
+.sidebar-foot .signout:hover{color:#fff;}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{height:58px;flex:0 0 auto;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:20;}
+.topbar .crumb{font-size:.78rem;color:var(--ink-faint);}
+.topbar .crumb b{color:var(--ink);font-weight:600;}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.lang-toggle{display:flex;border:1px solid var(--border);border-radius:100px;overflow:hidden;}
+.lang-toggle button{border:none;background:var(--surface);padding:5px 12px;font-size:.72rem;font-weight:600;color:var(--ink-soft);cursor:pointer;}
+.lang-toggle button.active{background:var(--navy);color:#fff;}
+.date-chip{font-size:.76rem;color:var(--ink-soft);font-family:var(--font-mono);}
+
+.page{padding:24px 28px 60px;max-width:1280px;}
+.page-head{margin-bottom:20px;}
+.page-head h1{font-family:var(--font-serif);font-size:1.5rem;margin:0 0 4px;font-weight:600;}
+.page-head p{margin:0;color:var(--ink-soft);font-size:.86rem;max-width:660px;line-height:1.5;}
+.page-head-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+
+.tab-card{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:0 var(--radius-m) var(--radius-m) var(--radius-m);margin-top:14px;box-shadow:var(--shadow-1);}
+.tab-card::before{content:attr(data-tab);position:absolute;top:-22px;left:0;background:var(--navy);color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px 5px;border-radius:var(--radius-s) var(--radius-s) 0 0;clip-path: polygon(0 0, 100% 0, 92% 100%, 0% 100%);}
+.tab-card.amber::before{background:var(--marigold);}
+.tab-card.green::before{background:var(--green);}
+.tab-card.navy::before{background:var(--navy);}
+.tab-card.purple::before{background:var(--purple);}
+.tab-card-body{padding:18px 18px 16px;}
+
+.dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:34px 22px;margin-top:20px;}
+.dash-grid .span-2{grid-column:1/-1;}
+@media (max-width:900px){.dash-grid{grid-template-columns:1fr;}.dash-grid .span-2{grid-column:auto;}}
+
+.list-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-soft);}
+.list-row:last-child{border-bottom:none;}
+.chk{width:17px;height:17px;flex:0 0 auto;margin-top:2px;border:1.5px solid var(--ink-faint);border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:#fff;}
+.chk.checked{background:var(--green);border-color:var(--green);color:#fff;font-size:.7rem;}
+.list-row .main-text{font-size:.85rem;line-height:1.4;}
+.list-row.done .main-text{text-decoration:line-through;color:var(--ink-faint);}
+.list-row .meta{font-size:.72rem;color:var(--ink-faint);margin-top:2px;}
+.empty-note{color:var(--ink-faint);font-size:.82rem;font-style:italic;padding:8px 0;}
+
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:14px;}
+table{width:100%;border-collapse:collapse;font-size:.83rem;}
+thead th{text-align:left;background:var(--bg-alt);color:var(--ink-soft);font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;padding:9px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody td{padding:10px 14px;border-bottom:1px solid var(--border-soft);vertical-align:top;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--bg-alt);}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.link-btn{background:none;border:none;color:var(--navy);font-size:.78rem;font-weight:600;cursor:pointer;padding:2px 4px;}
+.link-btn:hover{text-decoration:underline;}
+.link-btn.danger{color:var(--red);}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px;}
+.toolbar input[type=text],.toolbar input[type=search],.toolbar input[type=date],.toolbar select{padding:8px 11px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:.82rem;background:#fff;font-family:inherit;}
+.toolbar label.chk-label{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--ink-soft);}
+.toolbar .spacer{flex:1;}
+.tabs-row{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-top:6px;flex-wrap:wrap;}
+.tabs-row button{background:none;border:none;padding:9px 14px;font-size:.82rem;font-weight:600;color:var(--ink-faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.tabs-row button.active{color:var(--navy);border-bottom-color:var(--marigold);}
+
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:16px;}
+.simple-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:14px 16px;box-shadow:var(--shadow-1);}
+.simple-card h3{margin:0 0 3px;font-size:.94rem;font-family:var(--font-serif);}
+.simple-card .role{font-size:.76rem;color:var(--marigold-dark);font-weight:600;margin-bottom:4px;}
+.simple-card .line{font-size:.79rem;color:var(--ink-soft);margin-bottom:2px;}
+.simple-card .actions{margin-top:10px;display:flex;gap:8px;}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(18,15,8,.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal{background:var(--surface);border-radius:var(--radius-m);width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-2);}
+.modal.wide{max-width:820px;}
+.modal-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:2;}
+.modal-head h2{font-family:var(--font-serif);font-size:1.08rem;margin:0;font-weight:600;}
+.modal-close{background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--ink-faint);padding:4px;}
+.modal-body{padding:20px 22px;}
+.modal-foot{padding:14px 22px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--border-soft);margin-top:6px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+.form-grid .full{grid-column:1/-1;}
+
+.kanban{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;margin-top:16px;}
+.kanban-col{flex:0 0 240px;background:var(--bg-alt);border-radius:var(--radius-m);padding:10px;}
+.kanban-col h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin:2px 4px 10px;font-weight:700;}
+.kanban-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-s);padding:10px 12px;margin-bottom:8px;font-size:.79rem;box-shadow:var(--shadow-1);}
+.kanban-card .kc-title{font-weight:600;margin-bottom:4px;}
+.kanban-card .kc-meta{color:var(--ink-faint);font-size:.71rem;}
+.kanban-card.overdue{border-color:var(--red);background:var(--red-tint);}
+
+.tl{border-left:2px solid var(--border);margin-left:8px;padding-left:18px;margin-top:14px;}
+.tl-item{position:relative;padding-bottom:16px;}
+.tl-item::before{content:'';position:absolute;left:-23px;top:3px;width:9px;height:9px;border-radius:50%;background:var(--navy);}
+.tl-item .tl-date{font-size:.7rem;color:var(--ink-faint);font-family:var(--font-mono);}
+.tl-item .tl-text{font-size:.84rem;margin-top:2px;}
+
+.stat-row{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px;}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:14px 18px;min-width:130px;box-shadow:var(--shadow-1);}
+.stat-box .num{font-family:var(--font-serif);font-size:1.5rem;font-weight:600;color:var(--navy);}
+.stat-box .lbl{font-size:.72rem;color:var(--ink-soft);margin-top:2px;}
+.section-title{font-family:var(--font-serif);font-size:1.05rem;font-weight:600;margin:26px 0 4px;}
+.mom-meta{font-size:.85rem;color:var(--ink-soft);margin:2px 0 14px;}
+.mom-meta div{padding:2px 0;}
+.mom-meta b{color:var(--ink);}
+.priority-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;}
+.audit-log-item{padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:.8rem;}
+.audit-log-item .who{font-weight:600;}
+.audit-log-item .when{color:var(--ink-faint);font-size:.7rem;font-family:var(--font-mono);}
+.file-briefing-flag{cursor:pointer;}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--navy-dark);color:#fff;padding:11px 18px;border-radius:var(--radius-s);font-size:.82rem;box-shadow:var(--shadow-2);z-index:200;opacity:0;transform:translateY(8px);transition:all .25s ease;}
+.toast.show{opacity:1;transform:translateY(0);}
+
+/* ---------- rich text notes editor ---------- */
+.rte-toolbar{display:flex;gap:4px;flex-wrap:wrap;align-items:center;background:var(--bg-alt);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius-s) var(--radius-s) 0 0;padding:6px 7px;}
+.rte-toolbar button{background:var(--surface);border:1px solid var(--border);border-radius:4px;width:29px;height:27px;font-size:.8rem;cursor:pointer;color:var(--ink);}
+.rte-toolbar button:hover{background:var(--navy-tint);}
+.rte-toolbar button.wide{width:auto;padding:0 9px;font-size:.72rem;font-weight:600;}
+.rte-toolbar .sep{width:1px;height:20px;background:var(--border);margin:0 3px;}
+.rte-toolbar input[type=color]{width:27px;height:27px;padding:1px;border:1px solid var(--border);border-radius:4px;cursor:pointer;}
+.rte-toolbar select{height:27px;border:1px solid var(--border);border-radius:4px;font-size:.74rem;font-family:inherit;background:var(--surface);color:var(--ink);padding:0 4px;}
+.rte{min-height:160px;max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:0 0 var(--radius-s) var(--radius-s);padding:12px 14px;font-size:.87rem;line-height:1.6;background:#fff;text-align:justify;}
+.rte:focus{outline:none;border-color:var(--navy);}
+.rte table{border-collapse:collapse;margin:8px 0;}
+.rte table td{border:1px solid var(--border);padding:5px 8px;font-size:.85rem;}
+mark.action-flag{background:#FCE8B5;padding:0 2px;border-bottom:2px solid var(--marigold-dark);cursor:default;}
+.autosuggest-box{position:absolute;z-index:500;background:#fff;border:1px solid var(--border);border-radius:var(--radius-s);box-shadow:var(--shadow-2);min-width:140px;overflow:hidden;}
+.as-item{padding:6px 12px;font-size:.82rem;cursor:pointer;}
+.as-item:hover{background:var(--navy-tint);}
+.notes-preview{font-size:.85rem;color:var(--ink-soft);line-height:1.55;max-height:70px;overflow:hidden;position:relative;}
+.notes-preview::after{content:'';position:absolute;bottom:0;left:0;right:0;height:26px;background:linear-gradient(transparent,var(--surface));}
+.action-item-row{background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-s);padding:8px 10px;margin-bottom:6px;font-size:.8rem;}
+.action-item-row .ai-desc{font-weight:600;}
+.action-item-row .ai-meta{color:var(--ink-faint);font-size:.71rem;margin-top:2px;}
+.version-item{border-left:3px solid var(--navy);padding:6px 0 6px 12px;margin-bottom:8px;}
+.version-item .v-head{font-size:.76rem;font-weight:700;color:var(--navy);}
+.version-item .v-body{font-size:.82rem;color:var(--ink-soft);margin-top:2px;white-space:pre-wrap;}
+.type-chip{display:inline-block;padding:3px 10px;border-radius:100px;font-size:.71rem;font-weight:600;border:1px solid var(--border);cursor:pointer;background:#fff;color:var(--ink-soft);}
+.type-chip.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+.followup-post{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border-soft);}
+.followup-post:last-child{border-bottom:none;}
+.followup-post .fp-pin{width:8px;height:8px;border-radius:50%;background:var(--marigold);margin-top:6px;flex:0 0 auto;}
+.followup-post.done .fp-pin{background:var(--green);}
+.followup-post.done .fp-text{text-decoration:line-through;color:var(--ink-faint);}
+.attachment-list{display:flex;flex-direction:column;gap:5px;margin-top:4px;}
+.attachment-chip{display:inline-flex;align-items:center;gap:5px;font-size:.79rem;color:var(--navy);text-decoration:none;background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-s);padding:4px 9px;width:fit-content;}
+.attachment-chip:hover{background:var(--navy-tint);}
+
+@media print{
+  .app-shell, .toast, #screen-login, #screen-setup { display:none !important; }
+  .modal-backdrop{position:static !important;background:none !important;display:block !important;padding:0 !important;}
+  .modal{position:static !important;width:100% !important;max-width:100% !important;max-height:none !important;overflow:visible !important;box-shadow:none;border:none;margin:0;}
+  .modal-head{position:static !important;} /* was "sticky" for on-screen scrolling — must not repeat itself on every printed page */
+  .modal-body{max-height:none;overflow:visible;}
+  .rte{max-height:none;overflow:visible;text-align:justify;background:none !important;border:none !important;padding:0 !important;}
+  .modal-close, .no-print{display:none !important;}
+  /* Keep each note paragraph/list item/action item intact rather than splitting across a page break. */
+  .rte p, .rte li, .rte table, .action-item-row, .mom-meta div{ break-inside:avoid; page-break-inside:avoid; }
+  .mom-meta{ margin-bottom:14px; }
+  @page{ margin:16mm 14mm; }
+}
+
+/* ---------- mobile: collapsible sidebar drawer ---------- */
+@media (max-width: 860px){
+  .hamburger-btn{display:inline-block;}
+  .app-shell{display:block;}
+  .sidebar{
+    position:fixed; top:0; left:0; height:100vh; z-index:60;
+    transform:translateX(-100%);
+    transition:transform .22s ease;
+    box-shadow:2px 0 18px rgba(0,0,0,.25);
+  }
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-backdrop{
+    display:none; position:fixed; inset:0; background:rgba(18,15,8,.45); z-index:55;
+  }
+  .sidebar-backdrop.show{display:block;}
+  .main{width:100%;}
+  .page{padding:18px 16px 48px;}
+  .dash-grid{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#122736">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PESHI">
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="screen-login">
+  <div class="login-card">
+    <div class="login-letterhead">
+      <div class="login-emblem">GoAP</div>
+      <div class="dept">Office of the Private Secretary to Minister</div>
+      <div class="sub">Municipal Administration &amp; Urban Development · Government of Andhra Pradesh</div>
+    </div>
+    <div class="login-body">
+      <h1 class="login-title">Sign in to PESHI</h1>
+      <p class="login-desc">Integrated office management platform for the Minister's peshi.</p>
+      <form id="loginForm">
+        <div class="field"><label for="loginUser">Email</label><input type="email" id="loginUser" placeholder="e.g. priya.ps@yourdept.gov.in" required></div>
+        <div class="field"><label for="loginPass">Password</label><input type="password" id="loginPass" placeholder="••••••••" required></div>
+        <div id="loginError" class="small hidden" style="color:var(--red);margin:-6px 0 12px;"></div>
+        <button type="submit" class="btn btn-primary btn-block" id="loginSubmitBtn">Sign in</button>
+      </form>
+    </div>
+    <div class="login-foot">For authorised departmental use only · All activity is logged</div>
+  </div>
+</div>
+
+<!-- ============ FIRST-TIME SETUP SCREEN (shown only if Supabase keys are missing) ============ -->
+<div id="screen-setup" class="hidden">
+  <div class="login-card" style="max-width:520px;">
+    <div class="login-letterhead">
+      <div class="dept">One-time setup needed</div>
+      <div class="sub">Connect this file to your Supabase project</div>
+    </div>
+    <div class="login-body">
+      <p class="login-desc">This copy of PESHI hasn't been connected to your database yet. Open this file in a text editor, find the line near the top of the &lt;script&gt; section that says <b>SUPABASE_URL</b> and <b>SUPABASE_ANON_KEY</b>, and paste in the two values from your Supabase project's Settings → API page. Save the file and reload this page.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div class="app-shell hidden" id="appShell">
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <div class="wordmark">PESHI<span>.</span></div>
+      <div class="dept-line">MA&amp;UD · Minister's Office<br>Government of Andhra Pradesh</div>
+    </div>
+    <div class="nav-group" id="navGroup"></div>
+    <div class="sidebar-foot">
+      <div class="sidebar-user">
+        <div class="avatar" id="sbAvatar">P</div>
+        <div class="who"><div class="name" id="sbName" style="cursor:pointer;text-decoration:underline dotted;" title="Click to edit your display name" onclick="openEditOwnNameModal()">Priya Raghavan</div><div class="role" id="sbRole">Super Admin</div></div>
+      </div>
+      <div class="signout" id="installAppBtn" style="display:none;margin-bottom:8px;">⭳ Install app</div>
+      <div class="signout" id="signOutBtn">↩ Sign out</div>
+    </div>
+  </div>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <div class="main">
+    <div class="topbar">
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">☰</button>
+      <div class="crumb">PESHI / <b id="crumbTitle">Home Dashboard</b></div>
+      <div class="topbar-right">
+        <span class="date-chip" id="topDate"></span>
+      </div>
+    </div>
+    <div id="pageHost"></div>
+  </div>
+</div>
+
+<div id="modalHost"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================================================================
+   PESHI — Phase 1 live on Supabase (Auth, Home Dashboard, Calendar,
+   To-Dos, Contacts). Meetings & MoM, e-Office, Deadlines & Works,
+   Establishment Matters, Legislative Matters, Representations, and
+   Admin remain in-memory demo data until wired in a later phase.
+====================================================================== */
+
+/* ---------------- SUPABASE CONNECTION — fill these in, see setup guide ---------------- */
+const SUPABASE_URL = 'https://vrcthmiaappjtyqrdmdp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyY3RobWlhYXBwanR5cXJkbWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3ODQ2NjYsImV4cCI6MjEwNDM2MDY2Nn0.4mgE9NTim5yz28D6iHW1smCrGdakaK2V9-3Lw14jlQQ';
+const supa = (SUPABASE_URL.startsWith('http'))
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+if(!supa){
+  document.getElementById('screen-login').classList.add('hidden');
+  document.getElementById('screen-setup').classList.remove('hidden');
+}
+
+/* ---------------- i18n ---------------- */
+const I18N = {
+  en: {
+    nav_home:"Home Dashboard", nav_calendar:"Calendar", nav_todo:"To-Dos",
+    nav_contacts:"Contacts Directory", nav_mom:"Meetings & MoM", nav_eoffice:"e-Office Files",
+    nav_deadlines:"Deadlines & Works", nav_establishment:"Establishment Matters", nav_legislative:"Legislative Matters",
+    nav_representations:"Representations (VIP)", nav_admin:"Admin & Users",
+    group_ops:"Daily Operations", group_records:"Records & Tracking", group_vip:"VIP Relations", group_admin:"Administration"
+  },
+  te: {
+    nav_home:"హోమ్ డాష్‌బోర్డ్", nav_calendar:"క్యాలెండర్", nav_todo:"టు-డూలు",
+    nav_contacts:"కాంటాక్ట్స్ డైరెక్టరీ", nav_mom:"సమావేశాలు & MoM", nav_eoffice:"ఇ-ఆఫీస్ ఫైళ్లు",
+    nav_deadlines:"గడువులు & పనులు", nav_establishment:"స్థాపన వ్యవహారాలు", nav_legislative:"శాసనసభ వ్యవహారాలు",
+    nav_representations:"ప్రతినిధిత్వాలు (VIP)", nav_admin:"అడ్మిన్ & వినియోగదారులు",
+    group_ops:"రోజువారీ కార్యకలాపాలు", group_records:"రికార్డులు & ట్రాకింగ్", group_vip:"VIP సంబంధాలు", group_admin:"నిర్వహణ"
+  }
+};
+let LANG = 'en';
+function t(key){ return (I18N[LANG] && I18N[LANG][key]) || I18N.en[key] || key; }
+
+/* ---------------- utilities ---------------- */
+const uid = (() => { let n = 1000; return () => 'ID-' + (n++); })();
+function fmtDate(d){ const dt = (d instanceof Date) ? d : new Date(d); return dt.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }); }
+function fmtDateTime(d){ const dt = (d instanceof Date) ? d : new Date(d); return dt.toLocaleDateString('en-IN', { day:'2-digit', month:'short' }) + ', ' + dt.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' }); }
+function daysUntil(d){ const today = new Date(); today.setHours(0,0,0,0); const target = new Date(d); target.setHours(0,0,0,0); return Math.round((target - today) / 86400000); }
+function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function stripHtml(html){ const d = document.createElement('div'); d.innerHTML = html || ''; return d.textContent || ''; }
+function showToast(msg){ const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(showToast._t); showToast._t = setTimeout(()=>el.classList.remove('show'), 2800); }
+function downloadText(filename, text){ const blob = new Blob([text], {type:'text/plain'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href); }
+function fileSize(bytes){ if(bytes < 1024) return bytes+' B'; if(bytes < 1024*1024) return (bytes/1024).toFixed(0)+' KB'; return (bytes/(1024*1024)).toFixed(1)+' MB'; }
+
+/* ---------------- reference data for autosuggest / dropdowns ---------------- */
+const AP_ULB_NAMES = ['Vijayawada Municipal Corporation','Guntur Municipal Corporation','Tirupati Municipal Corporation','Kakinada Municipal Corporation','Rajahmundry Municipal Corporation','Nellore Municipal Corporation','Kurnool Municipal Corporation','Kadapa Municipal Corporation','Visakhapatnam Municipal Corporation','Anantapur Municipal Corporation','Eluru Municipal Corporation','Ongole Municipal Corporation'];
+const DEPARTMENTS = ['CDMA','PHEnC','DTCP','MEPMA','CRDA','Housing','Town Planning','Engineering','Vigilance'];
+const AUTOSUGGEST_DICTIONARY = [...new Set([
+  ...AP_ULB_NAMES.join(' ').split(' '), ...DEPARTMENTS,
+  'Commissioner','Engineer-in-Chief','Chief Engineer','Superintending Engineer','Executive Engineer','Deputy Executive Engineer','Assistant Engineer',
+  'sanction','tender','deadline','drainage','water supply','layout regularization','building penalization','TIDCO','Anna Canteen',
+  'waste management','review meeting','action item','pending','completed','budget','allocation','Government Order','file number',
+  'vigilance','transfer','vacancy','bill','question','Assembly','Council','constituency','grievance','representation','briefing',
+  'Minister','Secretary','Collector','MLA','MP','Joint Collector','works progress','administrative sanction','technical sanction',
+  'financial bid','letter of acceptance','work closure'
+])].filter(w=>w.length>2);
+
+/* ---------------- seed data ---------------- */
+const today = new Date();
+function toLocalISODate(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+function offsetDate(days){ const d = new Date(); d.setDate(d.getDate()+days); return toLocalISODate(d); }
+
+const CONTACT_TYPES = ['HoD Central Office','Regional Office','ULB Functionary','Urban Development Authority','CRDA/ADCL/AGICL','Contractor'];
+
+const STATE = {
+  currentUser: null,
+
+  users: [
+    { id:uid(), name:'Priya Raghavan', role:'Super Admin', username:'priya.ps', status:'Active', lastActive:'Today, 09:12' },
+    { id:uid(), name:'Arjun Vempati', role:'Editor (OSD)', username:'arjun.osd', status:'Active', lastActive:'Today, 08:47' },
+    { id:uid(), name:'Kavitha Reddy', role:'Data-Entry Staff', username:'kavitha.de', status:'Active', lastActive:'Yesterday, 18:20' },
+    { id:uid(), name:"Hon'ble Minister (view)", role:'Read-only', username:'minister.view', status:'Active', lastActive:'2 days ago' },
+  ],
+
+  auditLog: [
+    { who:'Kavitha Reddy', action:'Added transfer request — Executive Engineer, Kakinada', when:'Today, 10:02' },
+    { who:'Arjun Vempati', action:'Marked e-Office file EOF-118 (Important) as "Needs Briefing"', when:'Today, 09:41' },
+    { who:'Priya Raghavan', action:'Updated deadline for Tender — Vijayawada UGD Phase 2', when:'Today, 09:15' },
+    { who:'Kavitha Reddy', action:'Saved MoM — CRDA review, 28 Aug', when:'Yesterday, 17:55' },
+    { who:'Arjun Vempati', action:'Posted follow-up from Minister\'s call with MLA, Kurnool', when:'Yesterday, 16:30' },
+  ],
+
+  followUps: [
+    { id:uid(), text:"Minister directed PS to ensure UGD Phase 2 technical sanction file is expedited before his Vijayawada visit next week.", context:'Direction to PS', vip:'', postedBy:'Priya Raghavan', when:'Today, 08:55', done:false },
+    { id:uid(), text:"On call with MLA (Kurnool), Minister assured action on Anna Canteen kitchen upgrade within 10 days — to be tracked.", context:'Call with VIP', vip:'MLA, Kurnool', postedBy:'Arjun Vempati', when:'Yesterday, 16:28', done:false },
+    { id:uid(), text:"Minister asked for a one-page note on Guntur LRS collection shortfall before tomorrow's review.", context:'Direction to PS', vip:'', postedBy:'Kavitha Reddy', when:'Yesterday, 11:10', done:true },
+  ],
+
+  calendarEvents: [
+    { id:uid(), date:offsetDate(0), time:'10:00', title:'Camp office hours — Vijayawada', location:'Camp Office, VJA', done:false },
+    { id:uid(), date:offsetDate(0), time:'12:30', title:'Review meeting — CRDA works progress', location:'MA&UD Secretariat', done:false },
+    { id:uid(), date:offsetDate(0), time:'16:00', title:'Call with Guntur Municipal Commissioner', location:'Phone', done:true },
+    { id:uid(), date:offsetDate(1), time:'11:00', title:'Constituency visit — ward grievance camp', location:'Home constituency', done:false },
+    { id:uid(), date:offsetDate(2), time:'15:00', title:'TIDCO housing progress review', location:'Video call', done:false },
+    { id:uid(), date:offsetDate(3), time:'09:30', title:'Meeting — Anna Canteen scheme rollout', location:'Secretariat', done:false },
+  ],
+
+  todos: [
+    { id:uid(), description:'Convey message to Minister — road repair request, Kurnool ward 14', source:'Call', createdBy:'Kavitha Reddy', time:'09:05', priority:'High', status:'Open' },
+    { id:uid(), description:'Appointment request from Nellore ULB Commissioner re: LRS backlog', source:'Whatsapp Message', createdBy:'Arjun Vempati', time:'08:50', priority:'Medium', status:'Open' },
+    { id:uid(), description:'Follow up: MLA request for drainage works sanction, Tirupati', source:'Minister Sir Direction', createdBy:'Priya Raghavan', time:'Yesterday', priority:'High', status:'Done' },
+    { id:uid(), description:'Share Anna Canteen coverage report with CDMA office', source:'Email', createdBy:'Kavitha Reddy', time:'Yesterday', priority:'Low', status:'Open' },
+  ],
+
+  contacts: [
+    { id:uid(), type:'ULB Functionary', name:'K. Suresh Babu', designation:'Municipal Commissioner', jurisdiction:'Vijayawada Municipal Corporation', phone:'+91 98480 11223', email:'commr.vmc@ap.gov.in', notes:'Prefers WhatsApp for quick updates' },
+    { id:uid(), type:'ULB Functionary', name:'M. Lakshmi Devi', designation:'Municipal Commissioner', jurisdiction:'Guntur Municipal Corporation', phone:'+91 98481 22334', email:'commr.gmc@ap.gov.in', notes:'' },
+    { id:uid(), type:'HoD Central Office', name:'T. Ravindra Kumar', designation:'Chief Engineer, PHEnC', jurisdiction:'PHEnC Head Office', phone:'+91 94901 33445', email:'ce.phenc@ap.gov.in', notes:'Handles UGD Phase 2 clearances' },
+    { id:uid(), type:'Regional Office', name:'B. Anitha Rao', designation:'Regional Director of Municipal Administration (RDMA)', jurisdiction:'Krishna Region', phone:'+91 90001 44556', email:'', notes:'' },
+    { id:uid(), type:'Regional Office', name:'V. Nageswara Rao', designation:'Superintending Engineer (PH), Regional Office', jurisdiction:'East Godavari Region', phone:'+91 90002 55667', email:'', notes:'' },
+    { id:uid(), type:'ULB Functionary', name:'S. Padmavathi', designation:'Town Planning Officer', jurisdiction:'Tirupati Municipal Corporation', phone:'+91 90003 66778', email:'tpo.tpt@ap.gov.in', notes:'BPS applications contact' },
+    { id:uid(), type:'Urban Development Authority', name:'D. Chaitanya', designation:'Executive Engineer, UDA', jurisdiction:'Rajahmundry Urban Development Authority', phone:'+91 90004 77889', email:'', notes:'' },
+    { id:uid(), type:'CRDA/ADCL/AGICL', name:'R. Hemanth', designation:'Superintending Engineer, CRDA', jurisdiction:'CRDA, Amaravati', phone:'+91 90005 88990', email:'se.crda@ap.gov.in', notes:'Coordinates capital region works' },
+    { id:uid(), type:'Contractor', name:'M/s Sri Balaji Constructions', designation:'Contractor — Road works', jurisdiction:'Guntur Municipal Corporation', phone:'+91 90006 99001', email:'', notes:'Executing Ring Road widening' },
+    { id:uid(), type:'HoD Central Office', name:'P. Venkat Rao', designation:'Assistant Engineer, DTCP', jurisdiction:'DTCP Head Office', phone:'+91 90007 12300', email:'', notes:'' },
+  ],
+
+  meetings: [
+    { id:uid(), date:offsetDate(-2), subject:'CRDA works progress review', deptUlb:'CRDA / Amaravati', attendees:'PS, SE (CRDA), EE (Roads)',
+      notesHtml:'Reviewed pending road works in Amaravati capital region. <b>Funding bottleneck</b> for Phase 3 layouts discussed at length; SE to submit a revised BoQ. <mark class="action-flag">Submit revised BoQ for Phase 3 roads within 7 days</mark>.',
+      actionItems:[ { desc:'Submit revised BoQ for Phase 3 roads', officer:'SE, CRDA', deadline:offsetDate(7), status:'Open' } ] },
+    { id:uid(), date:offsetDate(-5), subject:'Guntur ULB — LRS/BPS collections', deptUlb:'Town Planning / Guntur Municipal Corporation', attendees:'PS, Commissioner GMC, TPO',
+      notesHtml:'LRS collections behind target for the quarter. <mark class="action-flag">TPO to complete pending BPS field verifications</mark> — flagged overdue. Commissioner to submit a <u>recovery plan</u> for LRS collections.',
+      actionItems:[ { desc:'Complete pending BPS field verifications', officer:'TPO, GMC', deadline:offsetDate(-1), status:'Overdue' },
+                    { desc:'Submit LRS collection recovery plan', officer:'Commissioner, GMC', deadline:offsetDate(10), status:'Open' } ] },
+    { id:uid(), date:offsetDate(-9), subject:'Anna Canteen scheme coverage review', deptUlb:'MEPMA / State-wide', attendees:'PS, OSD, MEPMA nodal officer',
+      notesHtml:'Discussed expansion of Anna Canteen coverage to two additional ULBs before the next quarter. <mark class="action-flag">MEPMA nodal officer to identify 2 new ULBs</mark>.',
+      actionItems:[ { desc:'Identify 2 new ULBs for Anna Canteen expansion', officer:'MEPMA Nodal Officer', deadline:offsetDate(14), status:'Open' } ] },
+  ],
+
+  eofficeFiles: [
+    { id:uid(), category:'Important', fileNumber:'MAUD/2201/2026', subject:'Sanction of UGD Phase 2 works — Vijayawada', department:'PHEnC', status:'Pending Minister approval', lastMoved:offsetDate(-1),
+      remarks:'Initiated at PHEnC office; moved to Secretary, MA&UD on '+fmtDate(offsetDate(-4))+'; received in Minister\'s office on '+fmtDate(offsetDate(-1))+'. Awaiting Minister\'s decision.' },
+    { id:uid(), category:'Important', fileNumber:'MAUD/2214/2026', subject:'TIDCO housing allotment policy — draft GO', department:'Housing', status:'Under Secretary review', lastMoved:offsetDate(-2),
+      remarks:'Draft prepared on '+fmtDate(offsetDate(-12))+'; sent for Secretary review on '+fmtDate(offsetDate(-2))+'.' },
+    { id:uid(), category:'Important', fileNumber:'MAUD/2229/2026', subject:'Anna Canteen additional sanction — Kurnool (Cabinet note)', department:'MEPMA', status:'Needs clarification from ULB', lastMoved:offsetDate(0),
+      remarks:'Initiated at MEPMA on '+fmtDate(offsetDate(-3))+'; query raised and returned to ULB today. Cabinet note — needs briefing before next Cabinet meeting.' },
+    { id:uid(), category:'Routine', fileNumber:'MAUD/1987/2026', subject:'Posting of Assistant Engineer — Kakinada', department:'CDMA', receivedOn:offsetDate(-3), summary:'Routine posting order for AE transferred in from Rajahmundry office; no objections received from either office.' },
+    { id:uid(), category:'Routine', fileNumber:'MAUD/1990/2026', subject:'Vigilance clearance — junior assistant, DTCP', department:'Vigilance', receivedOn:offsetDate(-6), summary:'Standard vigilance clearance request ahead of promotion; no pending cases against the individual as per records.' },
+  ],
+
+  deadlines: [
+    { id:uid(), description:'Submit revised BoQ for CRDA Phase 3 roads', officer:'SE, CRDA', hodName:'Commissioner, CRDA', dueDate:offsetDate(7), status:'Open', linkedMeeting:'CRDA works progress review' },
+    { id:uid(), description:'Complete pending BPS field verifications — Guntur', officer:'TPO, GMC', hodName:'Commissioner, GMC', dueDate:offsetDate(-1), status:'Overdue', linkedMeeting:'Guntur ULB — LRS/BPS collections' },
+    { id:uid(), description:'Submit LRS collection recovery plan — Guntur', officer:'Commissioner, GMC', hodName:'Commissioner, GMC', dueDate:offsetDate(10), status:'Open', linkedMeeting:'Guntur ULB — LRS/BPS collections' },
+    { id:uid(), description:'Identify 2 new ULBs for Anna Canteen expansion', officer:'MEPMA Nodal Officer', hodName:'Director, MEPMA', dueDate:offsetDate(14), status:'Open', linkedMeeting:'Anna Canteen scheme coverage review' },
+    { id:uid(), description:'Finalise waste processing agency MoU — Nellore', officer:'Commissioner, Nellore MC', hodName:'Commissioner, Nellore MC', dueDate:offsetDate(3), status:'Open', linkedMeeting:'—' },
+  ],
+
+  workItems: [
+    { id:uid(), ulb:'Vijayawada Municipal Corporation', scheme:'UGD Phase 2', stage:'Technical Sanction', dueDate:offsetDate(5) },
+    { id:uid(), ulb:'Guntur Municipal Corporation', scheme:'Road widening — Ring Road', stage:'Administrative Sanction', dueDate:offsetDate(-2) },
+    { id:uid(), ulb:'Tirupati Municipal Corporation', scheme:'Drainage works ward 9–14', stage:'Tender Floated', dueDate:offsetDate(9) },
+    { id:uid(), ulb:'Kakinada Municipal Corporation', scheme:'Solid waste processing unit', stage:'Tender Closing', dueDate:offsetDate(2) },
+    { id:uid(), ulb:'Rajahmundry Municipal Corporation', scheme:'Smart street lighting', stage:'Technical Bid Opening', dueDate:offsetDate(6) },
+    { id:uid(), ulb:'Nellore Municipal Corporation', scheme:'Market complex renovation', stage:'Financial Bid Opening', dueDate:offsetDate(-4) },
+    { id:uid(), ulb:'Kurnool Municipal Corporation', scheme:'Anna Canteen kitchen upgrade', stage:'Letter of Acceptance', dueDate:offsetDate(1) },
+    { id:uid(), ulb:'Kadapa Municipal Corporation', scheme:'Park development — Zone 3', stage:'Work Closure', dueDate:offsetDate(-10) },
+  ],
+
+  transfers: [
+    { id:uid(), name:'K. Ramana Murthy', designation:'Executive Engineer', currentPosting:'PHEnC, Kakinada', requestedPosting:'PHEnC, Vijayawada', requestReceivedOn:offsetDate(-4), details:'Requesting transfer to Vijayawada region on medical grounds of spouse.', status:'Open' },
+    { id:uid(), name:'S. Divya', designation:'Assistant Engineer', currentPosting:'DTCP, Head Office', requestedPosting:'DTCP, Regional Office (home district)', requestReceivedOn:offsetDate(-15), details:'Requesting transfer closer to home district; recommended by RDMA.', status:'Done' },
+  ],
+  vacancies: [
+    { id:uid(), post:'Town Planning Officer', office:'Tirupati Municipal Corporation', vacantSince:offsetDate(-10), details:'Post vacant since incumbent\'s promotion; ULB has requested urgent filling.', status:'Open' },
+    { id:uid(), post:'Deputy Executive Engineer', office:'CRDA, Amaravati', vacantSince:offsetDate(-20), details:'Vacant for over two months; affecting layout approval turnaround.', status:'Open' },
+  ],
+
+  legislativeBills: [
+    { id:uid(), title:'AP Municipal Solid Waste Management (Amendment) Bill', session:'Winter Session 2026', status:'Drafting',
+      versions:[ {version:1, date:offsetDate(-14), notes:'Initial draft circulated by CDMA legal cell — incorporates revised penalty structure for non-segregation.'},
+                 {version:2, date:offsetDate(-5), notes:'Revised after Law Department comments; clause 7 reworded for clarity on ULB enforcement powers.'} ] },
+    { id:uid(), title:'AP Urban Areas (Building Penalization) Amendment Bill', session:'Winter Session 2026', status:'Ready for introduction',
+      versions:[ {version:1, date:offsetDate(-25), notes:'Draft prepared incorporating BPS scheme extension timelines.'} ] },
+  ],
+  legislativeQuestions: [
+    { id:uid(), memberName:'Y. Satyanarayana, MLA', house:'Assembly', assemblyDate:offsetDate(4), questionNumber:'A-2214', sequenceNumber:'12', subject:'Status of UGD works in Vijayawada', draftAnswer:'Received from PHEnC — under review.', peshiNotes:'Recommend adding timeline table to the reply.', status:'Draft Received' },
+    { id:uid(), memberName:'K. Bhavani, MLC', house:'Council', assemblyDate:offsetDate(6), questionNumber:'C-118', sequenceNumber:'4', subject:'Anna Canteen coverage across districts', draftAnswer:'', peshiNotes:'Awaiting response from MEPMA.', status:'Pending Draft' },
+    { id:uid(), memberName:'R. Chandrasekhar, MLA', house:'Assembly', assemblyDate:offsetDate(-3), questionNumber:'A-2190', sequenceNumber:'7', subject:'TIDCO housing allotment delays', draftAnswer:'Final reply approved by Minister.', peshiNotes:'—', status:'Answered' },
+  ],
+
+  representations: [
+    { id:uid(), vip:'MLA, Kakinada', subject:'Irregular water supply in Ward 22 — constituent complaint', category:'Water Supply', ulbDept:'Kakinada Municipal Corporation', dateReceived:offsetDate(-4), status:'In Process' },
+    { id:uid(), vip:'MP, Guntur', subject:'Streetlight infrastructure near government school', category:'Infrastructure', ulbDept:'Guntur Municipal Corporation', dateReceived:offsetDate(-1), status:'Received' },
+    { id:uid(), vip:'MLC, Vijayawada', subject:'Drainage overflow complaints during monsoon', category:'Sanitation', ulbDept:'Vijayawada Municipal Corporation', dateReceived:offsetDate(-10), status:'Resolved' },
+  ],
+};
+
+/* ---------------- navigation config ---------------- */
+const NAV = [
+  { group:'group_ops', items:[
+    {id:'home', icon:'⌂', key:'nav_home'},
+    {id:'calendar', icon:'▦', key:'nav_calendar'},
+    {id:'todo', icon:'☎', key:'nav_todo'},
+    {id:'contacts', icon:'☰', key:'nav_contacts'},
+  ]},
+  { group:'group_records', items:[
+    {id:'mom', icon:'🗎', key:'nav_mom'},
+    {id:'eoffice', icon:'📁', key:'nav_eoffice'},
+    {id:'deadlines', icon:'⏱', key:'nav_deadlines'},
+    {id:'establishment', icon:'🗂', key:'nav_establishment'},
+    {id:'legislative', icon:'⚖', key:'nav_legislative'},
+  ]},
+  { group:'group_vip', items:[
+    {id:'representations', icon:'✉', key:'nav_representations'},
+  ]},
+  { group:'group_admin', items:[
+    {id:'admin', icon:'⚙', key:'nav_admin'},
+  ]},
+];
+const ROLE_LABELS = { superadmin:'Super Admin — PS to Minister', editor:'Editor (PS/OSD)', dataentry:'Data-Entry Staff', readonly:'Read-only (Minister view)' };
+let currentPage = 'home';
+
+/* =========================================================
+   LOGIN (Supabase Auth)
+========================================================= */
+document.getElementById('loginForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const email = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginSubmitBtn');
+  errEl.classList.add('hidden');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  const { data, error } = await supa.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Sign in';
+  if(error){
+    errEl.textContent = error.message === 'Invalid login credentials'
+      ? 'Incorrect email or password. If you don\'t have an account yet, ask your Admin to create one for you in Supabase.'
+      : error.message;
+    errEl.classList.remove('hidden');
+    return;
+  }
+  await loadProfileAndEnter(data.user);
+});
+async function loadProfileAndEnter(authUser){
+  let { data: profile } = await supa.from('profiles').select('*').eq('id', authUser.id).single();
+  if(!profile){
+    // First-ever sign-in for this account: ask what name PESHI should show for them,
+    // since Supabase Auth itself only has email/password — no display-name field.
+    const suggested = authUser.email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+    const chosenName = await promptForDisplayName(suggested);
+    const { data: created } = await supa.from('profiles').insert({ id: authUser.id, name: chosenName, role: 'Editor (PS/OSD)' }).select().single();
+    profile = created;
+  }
+  STATE.currentUser = { id: authUser.id, email: authUser.email, name: profile.name, roleLabel: profile.role };
+  document.getElementById('screen-login').classList.add('hidden');
+  document.getElementById('appShell').classList.remove('hidden');
+  document.getElementById('sbName').textContent = STATE.currentUser.name;
+  document.getElementById('sbRole').textContent = STATE.currentUser.roleLabel;
+  document.getElementById('sbAvatar').textContent = STATE.currentUser.name.charAt(0).toUpperCase();
+  buildNav(); navigateTo('home');
+  refreshNavBadges();
+  refreshEstBadge();
+  subscribeToLiveUpdates();
+  showToast('Signed in as ' + STATE.currentUser.name);
+}
+function promptForDisplayName(suggested){
+  return new Promise(resolve=>{
+    openModal(`
+      <div class="modal-head"><h2>Welcome to PESHI</h2></div>
+      <div class="modal-body">
+        <p class="small" style="margin-top:0;">What name should PESHI show for you? This is what other PSs will see everywhere you log or post something — you can change it later from Admin &amp; Users, or from your name in the sidebar.</p>
+        <div class="field"><label>Display name</label><input id="firstLoginName" value="${escapeHtml(suggested)}"></div>
+      </div>
+      <div class="modal-foot"><button class="btn btn-primary" id="firstLoginNameBtn">Continue</button></div>`, false, true);
+    document.getElementById('firstLoginNameBtn').addEventListener('click', ()=>{
+      const val = document.getElementById('firstLoginName').value.trim() || suggested;
+      closeModal();
+      resolve(val);
+    });
+  });
+}
+function openEditOwnNameModal(){
+  openModal(`
+    <div class="modal-head"><h2>Edit your display name</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body"><div class="field"><label>Display name</label><input id="ownNameInput" value="${escapeHtml(STATE.currentUser.name)}"></div></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveOwnName()">Save</button></div>`);
+}
+async function saveOwnName(){
+  const newName = document.getElementById('ownNameInput').value.trim();
+  if(!newName){ showToast('Please enter a name.'); return; }
+  const { error } = await supa.from('profiles').update({ name: newName }).eq('id', STATE.currentUser.id);
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  STATE.currentUser.name = newName;
+  document.getElementById('sbName').textContent = newName;
+  document.getElementById('sbAvatar').textContent = newName.charAt(0).toUpperCase();
+  closeModal(); showToast('Display name updated.');
+}
+document.getElementById('signOutBtn').addEventListener('click', async ()=>{
+  await supa.auth.signOut();
+  document.getElementById('appShell').classList.add('hidden');
+  document.getElementById('screen-login').classList.remove('hidden');
+  document.getElementById('loginForm').reset();
+  closeSidebar();
+});
+// If a session already exists (e.g., page refresh), sign the user straight back in.
+(async function checkExistingSession(){
+  if(!supa) return;
+  const { data: { session } } = await supa.auth.getSession();
+  if(session && session.user) await loadProfileAndEnter(session.user);
+})();
+
+/* =========================================================
+   NAV / SHELL
+========================================================= */
+let navBadgeCounts = { deadlines: 0, eoffice: 0, establishment: 0 };
+async function refreshNavBadges(){
+  const [{ data: openDeadlines }, { count: importantCount }] = await Promise.all([
+    supa.from('deadlines').select('due_date').eq('status','Open'),
+    supa.from('eoffice_files').select('*', { count:'exact', head:true }).eq('category','Important'),
+  ]);
+  const overdueCount = (openDeadlines||[]).filter(d => daysUntil(d.due_date) < 0).length;
+  navBadgeCounts = { deadlines: overdueCount, eoffice: importantCount||0 };
+  buildNav();
+}
+function buildNav(){
+  const host = document.getElementById('navGroup');
+  host.innerHTML = '';
+  NAV.forEach(section=>{
+    const label = document.createElement('div'); label.className = 'nav-label'; label.textContent = t(section.group); host.appendChild(label);
+    section.items.forEach(item=>{
+      const el = document.createElement('div');
+      el.className = 'nav-item' + (item.id===currentPage ? ' active':'');
+      el.dataset.page = item.id;
+      let countHtml = '';
+      if(item.id==='deadlines'){ const overdue = navBadgeCounts.deadlines; if(overdue>0){ el.classList.add('count-alert'); countHtml = `<span class="count">${overdue}</span>`; } }
+      if(item.id==='eoffice'){ const nb = navBadgeCounts.eoffice; if(nb>0){ countHtml = `<span class="count">${nb}</span>`; } }
+      if(item.id==='establishment'){ const op = navBadgeCounts.establishment; if(op>0){ countHtml = `<span class="count">${op}</span>`; } }
+      el.innerHTML = `<span class="ic">${item.icon}</span><span>${t(item.key)}</span>${countHtml}`;
+      el.addEventListener('click', ()=>{ navigateTo(item.id); closeSidebar(); });
+      host.appendChild(el);
+    });
+  });
+}
+function navigateTo(page){
+  currentPage = page;
+  buildNav();
+  document.getElementById('crumbTitle').textContent = document.querySelector(`.nav-item[data-page="${page}"] span:nth-child(2)`)?.textContent || page;
+  const renderers = { home: renderHome, calendar: renderCalendar, todo: renderTodo, contacts: renderContacts,
+    mom: renderMom, eoffice: renderEoffice, deadlines: renderDeadlines, establishment: renderEstablishment,
+    legislative: renderLegislative, representations: renderRepresentations, admin: renderAdmin };
+  (renderers[page] || renderHome)();
+}
+function tickClock(){ document.getElementById('topDate').textContent = new Date().toLocaleString('en-IN', { weekday:'short', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+setInterval(tickClock, 30000);
+
+/* =========================================================
+   AUDIT LOGGING — real, written by actions across every module.
+========================================================= */
+async function logAudit(action){
+  if(!supa || !STATE.currentUser) return;
+  await supa.from('audit_log').insert({ who: STATE.currentUser.name, action });
+  if(currentPage==='admin') renderAuditLog();
+}
+function getSupabaseProjectRef(){
+  const m = SUPABASE_URL.match(/https?:\/\/([a-z0-9-]+)\.supabase\.co/i);
+  return m ? m[1] : null;
+}
+
+/* =========================================================
+   LIVE SYNC — refresh the on-screen view when another PS
+   changes something, using Supabase Realtime.
+========================================================= */
+let liveChannel = null;
+function subscribeToLiveUpdates(){
+  if(liveChannel) return; // already subscribed this session
+  liveChannel = supa.channel('peshi-live-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'followups' }, ()=>{
+      if(currentPage==='home') refreshDashFollowups();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'calendar_events' }, ()=>{
+      if(currentPage==='home') refreshDashCalendar();
+      if(currentPage==='calendar') renderCalBody();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'todos' }, ()=>{
+      if(currentPage==='home') refreshDashTodos();
+      if(currentPage==='todo') renderTodoTable();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, ()=>{
+      if(currentPage==='contacts') renderContactGrid();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'eoffice_files' }, ()=>{
+      if(currentPage==='home') refreshDashFiles();
+      if(currentPage==='eoffice') renderEofficeBody();
+      refreshNavBadges();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'deadlines' }, ()=>{
+      if(currentPage==='home') refreshDashDeadlines();
+      if(currentPage==='deadlines' && deadlineView==='table') renderDeadlineBody();
+      refreshNavBadges();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'work_items' }, ()=>{
+      if(currentPage==='deadlines' && deadlineView==='kanban') renderDeadlineBody();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'meetings' }, ()=>{
+      if(currentPage==='mom' && !currentMomDetailId) renderMomList();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'action_items' }, ()=>{
+      if(currentPage==='mom' && !currentMomDetailId) renderMomList();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'transfers' }, ()=>{
+      if(currentPage==='establishment' && estView==='transfers') renderEstBody();
+      refreshEstBadge();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'vacancies' }, ()=>{
+      if(currentPage==='establishment' && estView==='vacancies') renderEstBody();
+      refreshEstBadge();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'legislative_bills' }, ()=>{
+      if(currentPage==='legislative' && legView==='bills') renderLegBody();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'bill_versions' }, ()=>{
+      if(currentPage==='legislative' && legView==='bills') renderLegBody();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'legislative_questions' }, ()=>{
+      if(currentPage==='legislative' && legView==='questions') renderLegBody();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'representations' }, ()=>{
+      if(currentPage==='representations') renderRepTable();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'audit_log' }, ()=>{
+      if(currentPage==='admin') renderAuditLog();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, ()=>{
+      if(currentPage==='admin') renderUserTable();
+    })
+    .subscribe();
+}
+function pageHead(title, desc, actionsHtml){ return `<div class="page-head"><div class="page-head-row"><div><h1>${title}</h1><p>${desc}</p></div><div>${actionsHtml||''}</div></div></div>`; }
+function host(){ return document.getElementById('pageHost'); }
+
+/* =========================================================
+   MODAL HELPERS
+========================================================= */
+function openModal(html, wide, noBackdropClose){
+  const modalHost = document.getElementById('modalHost');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'modal-backdrop';
+  wrapper.innerHTML = `<div class="modal ${wide?'wide':''}">${html}</div>`;
+  modalHost.appendChild(wrapper);
+  if(!noBackdropClose) wrapper.addEventListener('click', e=>{ if(e.target===wrapper) closeModal(); });
+}
+function closeModal(){
+  const modalHost = document.getElementById('modalHost');
+  if(modalHost.lastElementChild) modalHost.lastElementChild.remove();
+}
+
+/* =========================================================
+   RICH TEXT NOTES EDITOR (shared by Meetings & MoM)
+========================================================= */
+function rteToolbarHtml(editorId, includeActionItem){
+  if(includeActionItem === undefined) includeActionItem = true;
+  return `<div class="rte-toolbar no-print">
+    <button type="button" title="Bold" onclick="rteExec('${editorId}','bold')"><b>B</b></button>
+    <button type="button" title="Underline" onclick="rteExec('${editorId}','underline')"><u>U</u></button>
+    <button type="button" title="Highlight" onclick="rteExec('${editorId}','hiliteColor','#FCE8B5')" style="background:#FCE8B5;">H</button>
+    <input type="color" title="Text colour" onchange="rteExec('${editorId}','foreColor', this.value)" value="#241f16">
+    <select title="Font size" onchange="if(this.value){ rteExec('${editorId}','fontSize', this.value); this.value=''; }">
+      <option value="">Size</option>
+      <option value="2">Small</option>
+      <option value="3">Normal</option>
+      <option value="5">Large</option>
+      <option value="7">X-Large</option>
+    </select>
+    <div class="sep"></div>
+    <button type="button" class="wide" title="Bullet list" onclick="rteExec('${editorId}','insertUnorderedList')">• List</button>
+    <button type="button" class="wide" title="Numbered list" onclick="rteExec('${editorId}','insertOrderedList')">1. List</button>
+    <div class="sep"></div>
+    <button type="button" class="wide" title="Insert table" onclick="rteInsertTable('${editorId}')">⊞ Table</button>
+    <button type="button" class="wide" title="Add a row (click inside a table cell first)" onclick="rteTableEdit('${editorId}','addRow')">+Row</button>
+    <button type="button" class="wide" title="Remove current row (click inside a table cell first)" onclick="rteTableEdit('${editorId}','removeRow')">−Row</button>
+    <button type="button" class="wide" title="Add a column (click inside a table cell first)" onclick="rteTableEdit('${editorId}','addCol')">+Col</button>
+    <button type="button" class="wide" title="Remove current column (click inside a table cell first)" onclick="rteTableEdit('${editorId}','removeCol')">−Col</button>
+    <button type="button" class="wide" title="Make current column narrower" onclick="rteTableEdit('${editorId}','narrowCol')">⟵ Narrower</button>
+    <button type="button" class="wide" title="Make current column wider" onclick="rteTableEdit('${editorId}','widenCol')">Wider ⟶</button>
+    ${includeActionItem ? `<div class="sep"></div>
+    <button type="button" class="wide" title="Mark selected text as an action item" onclick="rteMarkActionItem('${editorId}')">🚩 Mark action item</button>` : ''}
+  </div>`;
+}
+function legacyTextToHtml(value){
+  // Older records stored this field as plain text (no formatting). If it doesn't
+  // already look like HTML, treat it as legacy plain text: escape it and turn
+  // line breaks into <br> so old content still displays with its spacing intact.
+  if(!value) return '';
+  if(/<[a-z][\s\S]*>/i.test(value)) return value;
+  return escapeHtml(value).replace(/\n/g, '<br>');
+}
+function rteExec(editorId, cmd, val){ document.getElementById(editorId).focus(); document.execCommand(cmd, false, val || null); }
+function rteInsertTable(editorId){
+  const el = document.getElementById(editorId); el.focus();
+  const html = '<table style="table-layout:fixed;width:100%;"><tr><td style="width:50%;">&nbsp;</td><td style="width:50%;">&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></table><p></p>';
+  document.execCommand('insertHTML', false, html);
+}
+function rteGetCurrentCell(editorEl){
+  const sel = window.getSelection();
+  if(!sel.rangeCount) return null;
+  let node = sel.getRangeAt(0).startContainer;
+  if(node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+  const cell = node && node.closest ? node.closest('td,th') : null;
+  return (cell && editorEl.contains(cell)) ? cell : null;
+}
+function rteTableEdit(editorId, action){
+  const editorEl = document.getElementById(editorId);
+  const cell = rteGetCurrentCell(editorEl);
+  if(!cell){ showToast('Click inside a table cell first, then use the table buttons.'); return; }
+  const tr = cell.closest('tr'); const table = cell.closest('table');
+  if(action==='addRow'){
+    const newRow = tr.cloneNode(true);
+    newRow.querySelectorAll('td,th').forEach(c=>c.innerHTML='&nbsp;');
+    tr.after(newRow);
+  } else if(action==='removeRow'){
+    if(table.querySelectorAll('tr').length<=1){ showToast('A table needs at least one row.'); return; }
+    tr.remove();
+  } else if(action==='addCol'){
+    const idx = cell.cellIndex;
+    table.querySelectorAll('tr').forEach(row=>{
+      const cells = row.querySelectorAll('td,th');
+      const newCell = document.createElement('td'); newCell.innerHTML = '&nbsp;';
+      if(cells[idx]) cells[idx].after(newCell); else row.appendChild(newCell);
+    });
+  } else if(action==='removeCol'){
+    const idx = cell.cellIndex;
+    const firstRowCellCount = table.querySelector('tr').querySelectorAll('td,th').length;
+    if(firstRowCellCount<=1){ showToast('A table needs at least one column.'); return; }
+    table.querySelectorAll('tr').forEach(row=>{
+      const cells = row.querySelectorAll('td,th');
+      if(cells[idx]) cells[idx].remove();
+    });
+  } else if(action==='widenCol' || action==='narrowCol'){
+    table.style.tableLayout = 'fixed';
+    const idx = cell.cellIndex;
+    const rows = table.querySelectorAll('tr');
+    const refCell = rows[0].children[idx] || cell;
+    const currentWidth = refCell.style.width ? parseInt(refCell.style.width) : refCell.offsetWidth;
+    const delta = action==='widenCol' ? 28 : -28;
+    const newWidth = Math.max(40, currentWidth + delta);
+    rows.forEach(row=>{ const c = row.children[idx]; if(c) c.style.width = newWidth + 'px'; });
+  }
+  editorEl.focus();
+}
+function rteMarkActionItem(editorId){
+  const sel = window.getSelection();
+  if(!sel.rangeCount || sel.isCollapsed){ showToast('Select some text in the notes first, then click "Mark action item".'); return; }
+  const range = sel.getRangeAt(0);
+  const editorEl = document.getElementById(editorId);
+  if(!editorEl.contains(range.commonAncestorContainer)){ showToast('Select text inside the notes field.'); return; }
+  const selectedText = range.toString().trim();
+  if(!selectedText) return;
+  try{
+    const mark = document.createElement('mark'); mark.className = 'action-flag'; mark.title = 'Action item';
+    range.surroundContents(mark);
+  }catch(err){ /* selection spans partial nodes — proceed without highlighting */ }
+  openActionItemPrompt(selectedText, editorId);
+}
+function openActionItemPrompt(desc, editorId){
+  window.__pendingAiDesc = desc;
+  openModal(`
+    <div class="modal-head"><h2>Add action item</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <p class="small" style="margin-top:0;">"${escapeHtml(desc)}"</p>
+      <div class="form-grid">
+        <div class="field"><label>Responsible officer</label><input id="aiOfficer"></div>
+        <div class="field"><label>Deadline</label><input type="date" id="aiDeadline" value="${offsetDate(7)}"></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="confirmActionItem()">Add to tracker</button></div>`);
+}
+function confirmActionItem(){
+  const officer = document.getElementById('aiOfficer').value.trim() || '—';
+  const deadline = document.getElementById('aiDeadline').value;
+  const item = { desc: window.__pendingAiDesc, officer, deadline, status:'Open' };
+  window.__pendingActionItems = window.__pendingActionItems || [];
+  window.__pendingActionItems.push(item);
+  closeModal();
+  showToast('Action item added — will feed the Deadlines & Works tracker on save.');
+  if(typeof window.__refreshActionItemPreview === 'function') window.__refreshActionItemPreview();
+}
+function setupAutosuggest(editorEl){
+  let box = document.getElementById('asBox');
+  if(!box){ box = document.createElement('div'); box.id='asBox'; box.className='autosuggest-box hidden'; document.body.appendChild(box); }
+  function hide(){ box.classList.add('hidden'); }
+  editorEl.addEventListener('keyup', (e)=>{
+    if(['ArrowUp','ArrowDown','Enter','Escape'].includes(e.key)){ hide(); return; }
+    const sel = window.getSelection();
+    if(!sel.rangeCount){ hide(); return; }
+    const range = sel.getRangeAt(0);
+    const node = range.startContainer;
+    if(node.nodeType !== Node.TEXT_NODE){ hide(); return; }
+    const textBefore = node.textContent.slice(0, range.startOffset);
+    const match = textBefore.match(/([A-Za-z]{2,})$/);
+    if(!match){ hide(); return; }
+    const frag = match[1];
+    const matches = AUTOSUGGEST_DICTIONARY.filter(w=>w.toLowerCase().startsWith(frag.toLowerCase()) && w.toLowerCase()!==frag.toLowerCase()).slice(0,6);
+    if(!matches.length){ hide(); return; }
+    const rects = range.getClientRects(); const rect = rects[0] || editorEl.getBoundingClientRect();
+    box.style.left = (rect.left + window.scrollX) + 'px'; box.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+    box.innerHTML = matches.map(m=>`<div class="as-item">${escapeHtml(m)}</div>`).join('');
+    box.classList.remove('hidden');
+    box.querySelectorAll('.as-item').forEach(item=>{
+      item.addEventListener('mousedown', (ev)=>{
+        ev.preventDefault();
+        const newRange = document.createRange();
+        newRange.setStart(node, range.startOffset - frag.length);
+        newRange.setEnd(node, range.startOffset);
+        newRange.deleteContents();
+        const tn = document.createTextNode(item.textContent + ' ');
+        newRange.insertNode(tn);
+        const after = document.createRange(); after.setStartAfter(tn); after.collapse(true);
+        sel.removeAllRanges(); sel.addRange(after);
+        hide(); editorEl.focus();
+      });
+    });
+  });
+  editorEl.addEventListener('blur', ()=> setTimeout(hide, 150));
+}
+function setupSmartPaste(editorEl){
+  editorEl.addEventListener('paste', function(e){
+    e.preventDefault();
+    const cd = e.clipboardData || window.clipboardData;
+    const html = cd.getData('text/html');
+    if(html && html.trim()){
+      document.execCommand('insertHTML', false, sanitizePastedHtml(html));
+      return;
+    }
+    const text = cd.getData('text/plain');
+    if(!text) return;
+    document.execCommand('insertHTML', false, smartFormatPastedText(text));
+  });
+}
+function sanitizePastedHtml(html){
+  // Word/Google Docs/etc. paste real bold/italic/list structure via the clipboard's
+  // HTML representation — this preserves it, stripping only the source's fonts,
+  // colours, and mso-* junk (which is what caused tiny bullets/foreign styling
+  // before), without reordering or reclassifying anything the source didn't have.
+  const ALLOWED = { P:1, BR:1, OL:1, UL:1, LI:1, B:1, STRONG:1, I:1, EM:1, U:1, TABLE:1, TBODY:1, THEAD:1, TR:1, TD:1, TH:1 };
+  const container = document.createElement('div');
+  container.innerHTML = html;
+  function clean(node){
+    const out = document.createDocumentFragment();
+    node.childNodes.forEach(child=>{
+      if(child.nodeType === Node.TEXT_NODE){ out.appendChild(document.createTextNode(child.textContent)); return; }
+      if(child.nodeType !== Node.ELEMENT_NODE) return;
+      let tag = child.tagName;
+      if(tag==='SPAN' || tag==='FONT' || tag==='O:P' || tag==='STYLE' || tag==='SCRIPT' || tag==='META' || tag==='LINK' || tag==='IMG'){
+        if(tag!=='STYLE' && tag!=='SCRIPT' && tag!=='META' && tag!=='LINK' && tag!=='IMG') out.appendChild(clean(child));
+        return;
+      }
+      if(/^H[1-6]$/.test(tag)){
+        const p = document.createElement('p'); const b = document.createElement('b');
+        b.appendChild(clean(child)); p.appendChild(b); out.appendChild(p); return;
+      }
+      if(tag==='DIV') tag = 'P';
+      if(!ALLOWED[tag]){ out.appendChild(clean(child)); return; }
+      const newEl = document.createElement(tag);
+      newEl.appendChild(clean(child));
+      out.appendChild(newEl);
+    });
+    return out;
+  }
+  const wrapper = document.createElement('div');
+  wrapper.appendChild(clean(container));
+  wrapper.querySelectorAll('p').forEach(p=>{ if(!p.textContent.trim() && !p.querySelector('br')) p.remove(); });
+  return wrapper.innerHTML;
+}
+function smartFormatPastedText(text){
+  const escT = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const rawLines = text.split(/\r?\n/).map(l=>l.trim()).filter(l=>l.length);
+  if(!rawLines.length) return '';
+  function classify(line){
+    if(/^\d+[\.\)]\s+/.test(line)) return 'num';
+    if(/^[a-zA-Z][\.\)]\s+/.test(line)) return 'alpha';
+    if(/^[•\u2022\-\*]\s+/.test(line)) return 'bullet';
+    if(/^\.\s+/.test(line)) return 'bullet'; // a lone "." as a bullet marker is a common PDF-copy artifact
+    return 'plain';
+  }
+  function stripMarker(line, type){
+    if(type==='num') return line.replace(/^\d+[\.\)]\s+/, '');
+    if(type==='alpha') return line.replace(/^[a-zA-Z][\.\)]\s+/, '');
+    if(type==='bullet') return line.replace(/^([•\u2022\-\*]|\.)\s+/, '');
+    return line;
+  }
+  // Build blocks (paragraphs / lists) with a state machine, so an unmarked
+  // "continuation" line — the common PDF-wrap case — is appended to whatever
+  // list item or paragraph was just open, instead of becoming a stray block.
+  const blocks = [];
+  let current = null;      // the block currently being built (a 'p', or a 'ul'/'ol')
+  let currentItem = null;  // for list blocks, the {text, sub} item currently open
+
+  for(const rawLine of rawLines){
+    const type = classify(rawLine);
+    if(type==='plain'){
+      if(currentItem){ currentItem.text += ' ' + escT(rawLine); }
+      else if(current && current.type==='p'){ current.text += ' ' + escT(rawLine); }
+      else { current = { type:'p', text: escT(rawLine) }; blocks.push(current); currentItem = null; }
+      continue;
+    }
+    if(type==='num' || type==='bullet'){
+      const listType = type==='num' ? 'ol' : 'ul';
+      if(!current || current.type!==listType){ current = { type:listType, items: [] }; blocks.push(current); }
+      currentItem = { text: escT(stripMarker(rawLine,type)), sub:[] };
+      current.items.push(currentItem);
+      continue;
+    }
+    if(type==='alpha'){
+      if(currentItem){ currentItem.sub.push(escT(stripMarker(rawLine,'alpha'))); }
+      else {
+        if(!current || current.type!=='ul'){ current = { type:'ul', items: [] }; blocks.push(current); }
+        currentItem = { text: escT(stripMarker(rawLine,'alpha')), sub:[] };
+        current.items.push(currentItem);
+      }
+      continue;
+    }
+  }
+  return blocks.map(b=>{
+    if(b.type==='p') return `<p>${b.text}</p>`;
+    const itemsHtml = b.items.map(it=>{
+      const sub = it.sub.length ? '<ul>' + it.sub.map(s=>`<li>${s}</li>`).join('') + '</ul>' : '';
+      return `<li>${it.text}${sub}</li>`;
+    }).join('');
+    return `<${b.type}>${itemsHtml}</${b.type}>`;
+  }).join('');
+}
+
+/* =========================================================
+   1. HOME DASHBOARD
+========================================================= */
+async function renderHome(){
+  host().innerHTML = `
+    ${pageHead('Home Dashboard','Live view of today\'s calendar, pending to-dos, follow-ups from the Minister, files awaiting briefing, and upcoming deadlines — shared across every signed-in PS.')}
+    <div class="dash-grid">
+      <div class="tab-card amber span-2" data-tab="Follow-ups from Minister">
+        <div class="tab-card-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span class="small">Posted by whichever PS is with the Minister — for every Peshi member to see and action.</span>
+            <button class="btn btn-marigold btn-sm" id="postFollowupBtn">+ Post follow-up</button>
+          </div>
+          <div id="dashFollowups"><div class="empty-note">Loading…</div></div>
+        </div>
+      </div>
+      <div class="tab-card navy" data-tab="Today's Calendar"><div class="tab-card-body" id="dashCalendar"><div class="empty-note">Loading…</div></div></div>
+      <div class="tab-card" data-tab="Today's To-Dos"><div class="tab-card-body" id="dashTodos"><div class="empty-note">Loading…</div></div></div>
+      <div class="tab-card" data-tab="e-Office · Recent Files"><div class="tab-card-body" id="dashFiles"><div class="empty-note">Loading…</div></div></div>
+      <div class="tab-card green" data-tab="Due Today"><div class="tab-card-body" id="dashDeadlines"><div class="empty-note">Loading…</div></div></div>
+    </div>`;
+
+  document.getElementById('postFollowupBtn').addEventListener('click', ()=>openFollowupModal());
+  refreshDashFollowups();
+  refreshDashCalendar();
+  refreshDashTodos();
+  refreshDashFiles();
+  refreshDashDeadlines();
+}
+async function refreshDashFiles(){
+  const filesEl = document.getElementById('dashFiles');
+  if(!filesEl) return;
+  const { data, error } = await supa.from('eoffice_files').select('*');
+  if(error){ filesEl.innerHTML = `<div class="empty-note">Couldn't load files (${escapeHtml(error.message)}).</div>`; return; }
+  const recent = data
+    .map(f => ({ ...f, sortDate: f.category==='Important' ? f.last_moved : f.received_on }))
+    .filter(f => f.sortDate)
+    .sort((a,b) => b.sortDate.localeCompare(a.sortDate))
+    .slice(0,5);
+  filesEl.innerHTML = (recent.length ? recent.map(f=>`
+    <div class="list-row"><div><div class="main-text"><span class="mono small">${escapeHtml(f.file_number||'')}</span> — ${escapeHtml(f.subject)}</div><div class="meta">${escapeHtml(f.department||'')} · ${f.category==='Important' ? escapeHtml(f.status||'') : 'Routine'}</div></div></div>`).join('')
+    : `<div class="empty-note">No e-Office files logged yet.</div>`) + `<div style="margin-top:10px;"><button class="link-btn" onclick="navigateTo('eoffice')">Open e-Office tracker →</button></div>`;
+}
+async function refreshDashDeadlines(){
+  const ddEl = document.getElementById('dashDeadlines');
+  if(!ddEl) return;
+  const { data, error } = await supa.from('deadlines').select('*').eq('status','Open').eq('due_date', offsetDate(0));
+  if(error){ ddEl.innerHTML = `<div class="empty-note">Couldn't load deadlines (${escapeHtml(error.message)}).</div>`; return; }
+  ddEl.innerHTML = (data.length ? data.map(d=>{
+    return `<div class="list-row"><div><div class="main-text">${escapeHtml(d.description)}</div><div class="meta">${escapeHtml(d.officer||'')} · ${fmtDate(d.due_date)} <span class="badge badge-amber" style="margin-left:6px;">Due today</span></div></div></div>`;
+  }).join('') : `<div class="empty-note">No deadlines due today.</div>`) + `<div style="margin-top:10px;"><button class="link-btn" onclick="navigateTo('deadlines')">Open deadline tracker →</button></div>`;
+}
+let followupsCache = [];
+async function refreshDashFollowups(){
+  const fuEl = document.getElementById('dashFollowups');
+  if(!fuEl) return;
+  const { data, error } = await supa.from('followups').select('*').order('done', {ascending:true}).order('posted_at', {ascending:false});
+  if(error){ fuEl.innerHTML = `<div class="empty-note">Couldn't load follow-ups (${escapeHtml(error.message)}).</div>`; return; }
+  followupsCache = data;
+  fuEl.innerHTML = data.length ? data.map(f=>`
+    <div class="followup-post ${f.done?'done':''}">
+      <div class="fp-pin"></div>
+      <div style="flex:1;">
+        <div class="fp-text">${escapeHtml(f.text)}</div>
+        <div class="meta small">${escapeHtml(f.context)}${f.vip?' · '+escapeHtml(f.vip):''} · posted by ${escapeHtml(f.posted_by)} · ${fmtDateTime(f.posted_at)}</div>
+      </div>
+      <div class="chk ${f.done?'checked':''}" data-toggle-fu="${f.id}" data-cur="${f.done}" title="Mark actioned">${f.done?'✓':''}</div>
+      <button class="link-btn" data-edit-fu="${f.id}" title="Edit this follow-up" style="margin-left:6px;">Edit</button>
+      <button class="link-btn danger" data-delete-fu="${f.id}" title="Delete this follow-up" style="margin-left:6px;">Delete</button>
+    </div>`).join('') : `<div class="empty-note">No follow-ups posted yet.</div>`;
+  fuEl.querySelectorAll('[data-toggle-fu]').forEach(el=>el.addEventListener('click', async ()=>{
+    await supa.from('followups').update({ done: el.dataset.cur !== 'true' }).eq('id', el.dataset.toggleFu);
+    refreshDashFollowups();
+  }));
+  fuEl.querySelectorAll('[data-edit-fu]').forEach(el=>el.addEventListener('click', ()=> openFollowupModal(el.dataset.editFu)));
+  fuEl.querySelectorAll('[data-delete-fu]').forEach(el=>el.addEventListener('click', async ()=>{
+    if(!confirm('Delete this follow-up? This cannot be undone.')) return;
+    await supa.from('followups').delete().eq('id', el.dataset.deleteFu);
+    refreshDashFollowups();
+  }));
+}
+async function refreshDashCalendar(){
+  const calEl = document.getElementById('dashCalendar');
+  if(!calEl) return;
+  const { data, error } = await supa.from('calendar_events').select('*').eq('date', offsetDate(0)).order('time');
+  if(error){ calEl.innerHTML = `<div class="empty-note">Couldn't load today's calendar (${escapeHtml(error.message)}).</div>`; return; }
+  calEl.innerHTML = (data.length ? data.map(e=>`
+    <div class="list-row ${e.done?'done':''}"><div class="chk ${e.done?'checked':''}" data-toggle-event="${e.id}" data-cur="${e.done}">${e.done?'✓':''}</div>
+      <div><div class="main-text"><b>${e.time}</b> — ${escapeHtml(e.title)}</div><div class="meta">${escapeHtml(e.location||'')}</div></div></div>`).join('')
+    : `<div class="empty-note">No events scheduled for today.</div>`) + `<div style="margin-top:10px;"><button class="link-btn" onclick="navigateTo('calendar')">Open full calendar →</button></div>`;
+  calEl.querySelectorAll('[data-toggle-event]').forEach(el=>el.addEventListener('click', async ()=>{
+    await supa.from('calendar_events').update({ done: el.dataset.cur !== 'true' }).eq('id', el.dataset.toggleEvent);
+    refreshDashCalendar();
+  }));
+}
+async function refreshDashTodos(){
+  const todoEl = document.getElementById('dashTodos');
+  if(!todoEl) return;
+  const { data, error } = await supa.from('todos').select('*').eq('status','Open').order('created_at', {ascending:false}).limit(5);
+  if(error){ todoEl.innerHTML = `<div class="empty-note">Couldn't load to-dos (${escapeHtml(error.message)}).</div>`; return; }
+  todoEl.innerHTML = (data.length ? data.map(td=>`
+    <div class="list-row"><div class="chk" data-toggle-todo="${td.id}" data-cur="${td.status}"></div>
+      <div><div class="main-text">${escapeHtml(td.description)}</div><div class="meta">Logged by ${escapeHtml(td.created_by)} · ${fmtDateTime(td.created_at)} · ${escapeHtml(td.source)}</div></div></div>`).join('')
+    : `<div class="empty-note">No open to-dos.</div>`) + `<div style="margin-top:10px;"><button class="link-btn" onclick="navigateTo('todo')">Open To-Dos →</button></div>`;
+  todoEl.querySelectorAll('[data-toggle-todo]').forEach(el=>el.addEventListener('click', async ()=>{
+    await supa.from('todos').update({ status: el.dataset.cur==='Done' ? 'Open' : 'Done' }).eq('id', el.dataset.toggleTodo);
+    refreshDashTodos();
+  }));
+}
+function openFollowupModal(id){
+  const f = id ? followupsCache.find(x=>x.id===id) : null;
+  openModal(`
+    <div class="modal-head"><h2>${f?'Edit follow-up':'Post a follow-up'}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <p class="small" style="margin-top:0;">For anything the Minister has directed a PS to do, or said on a call with a VIP — visible to every Peshi member instantly.</p>
+      <div class="field"><label>What was said / directed</label><textarea id="fuText" rows="3">${f?escapeHtml(f.text):''}</textarea></div>
+      <div class="form-grid">
+        <div class="field"><label>Context</label><select id="fuContext"><option ${f&&f.context==='Direction to PS'?'selected':''}>Direction to PS</option><option ${f&&f.context==='Call with VIP'?'selected':''}>Call with VIP</option><option ${f&&f.context==='Other'?'selected':''}>Other</option></select></div>
+        <div class="field"><label>VIP name (if applicable)</label><input id="fuVip" placeholder="e.g. MLA, Kurnool" value="${f?escapeHtml(f.vip||''):''}"></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveFollowup('${id||''}')">${f?'Save changes':'Post'}</button></div>`);
+}
+async function saveFollowup(id){
+  const text = document.getElementById('fuText').value.trim();
+  if(!text){ showToast('Please describe what was said or directed.'); return; }
+  const payload = { text, context: document.getElementById('fuContext').value, vip: document.getElementById('fuVip').value.trim() };
+  const { error } = id
+    ? await supa.from('followups').update(payload).eq('id', id)
+    : await supa.from('followups').insert({ ...payload, posted_by: STATE.currentUser.name, done: false });
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  logAudit((id?'Edited':'Posted') + ' a follow-up' + (payload.vip ? ' (re: '+payload.vip+')' : ''));
+  closeModal(); refreshDashFollowups(); showToast(id?'Follow-up updated.':'Posted — visible to all Peshi members.');
+}
+
+/* =========================================================
+   2. CALENDAR (no category field) — live via Supabase
+========================================================= */
+let calView = 'day';
+let calCache = [];
+let calSelectedDate = offsetDate(0);
+async function renderCalendar(){
+  host().innerHTML = `
+    ${pageHead('Calendar Management','Minister\'s daily/weekly/monthly schedule — shared across all PSs with full edit history.', `<button class="btn btn-marigold" id="addEventBtn">+ Add event</button>`)}
+    <div class="tabs-row">
+      <button data-view="day" class="${calView==='day'?'active':''}">Day</button>
+      <button data-view="week" class="${calView==='week'?'active':''}">Week</button>
+      <button data-view="month" class="${calView==='month'?'active':''}">Month</button>
+    </div>
+    <div id="calBody"><div class="empty-note">Loading…</div></div>`;
+  host().querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click', ()=>{ calView=b.dataset.view; renderCalBody(); }));
+  document.getElementById('addEventBtn').addEventListener('click', ()=>openEventModal());
+  await renderCalBody();
+}
+function shiftCalDate(days){
+  const d = new Date(calSelectedDate); d.setDate(d.getDate()+days);
+  calSelectedDate = toLocalISODate(d);
+  renderCalBody();
+}
+async function renderCalBody(){
+  const body = document.getElementById('calBody');
+  host().querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active', b.dataset.view===calView));
+  const { data, error } = await supa.from('calendar_events').select('*').order('date').order('time');
+  if(error){ body.innerHTML = `<div class="empty-note">Couldn't load events (${escapeHtml(error.message)}).</div>`; return; }
+  calCache = data;
+  if(calView==='day'){
+    const list = calCache.filter(e=>e.date===calSelectedDate).sort((a,b)=>a.time.localeCompare(b.time));
+    const isToday = calSelectedDate === offsetDate(0);
+    body.innerHTML = `
+      <div class="toolbar" style="align-items:center;">
+        <button class="btn btn-ghost btn-sm" id="calPrevDay">◀ Prev</button>
+        <input type="date" id="calDatePicker" value="${calSelectedDate}">
+        <button class="btn btn-ghost btn-sm" id="calNextDay">Next ▶</button>
+        ${!isToday ? `<button class="btn btn-ghost btn-sm" id="calTodayBtn">Today</button>` : ''}
+        <span class="small" style="margin-left:6px;">${new Date(calSelectedDate).toLocaleDateString('en-IN',{weekday:'long', day:'numeric', month:'long', year:'numeric'})}</span>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Time</th><th>Event</th><th>Location</th><th></th></tr></thead><tbody>
+      ${list.length ? list.map(calRow).join('') : `<tr><td colspan="4" class="empty-note">No events on this day. Use "Add event" to schedule one.</td></tr>`}
+    </tbody></table></div>`;
+    document.getElementById('calPrevDay').addEventListener('click', ()=>shiftCalDate(-1));
+    document.getElementById('calNextDay').addEventListener('click', ()=>shiftCalDate(1));
+    document.getElementById('calDatePicker').addEventListener('change', function(){ calSelectedDate = this.value; renderCalBody(); });
+    const todayBtn = document.getElementById('calTodayBtn');
+    if(todayBtn) todayBtn.addEventListener('click', ()=>{ calSelectedDate = offsetDate(0); renderCalBody(); });
+  } else if(calView==='week'){
+    const start = new Date(); start.setDate(start.getDate()-start.getDay());
+    let cols = '';
+    for(let i=0;i<7;i++){
+      const d = new Date(start); d.setDate(d.getDate()+i);
+      const iso = toLocalISODate(d);
+      const evs = calCache.filter(e=>e.date===iso).sort((a,b)=>a.time.localeCompare(b.time));
+      cols += `<div class="kanban-col" style="flex:1 1 0;min-width:170px;"><h4>${d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric'})}</h4>
+        ${evs.map(e=>`<div class="kanban-card">
+          <div class="kc-title">${e.time} ${escapeHtml(e.title)}</div><div class="kc-meta">${escapeHtml(e.location||'')}</div>
+          <div class="row-actions" style="margin-top:6px;"><button class="link-btn" onclick="openEventModal('${e.id}')">Edit</button><button class="link-btn danger" onclick="deleteEvent('${e.id}')">Delete</button></div>
+        </div>`).join('') || '<div class="small muted">—</div>'}
+      </div>`;
+    }
+    body.innerHTML = `<div class="kanban" style="margin-top:16px;">${cols}</div>`;
+  } else {
+    const now = new Date();
+    const month = now.getMonth(), year = now.getFullYear();
+    const first = new Date(year, month, 1); const startDow = first.getDay(); const daysInMonth = new Date(year, month+1, 0).getDate();
+    let cells = ''; for(let i=0;i<startDow;i++) cells += `<div></div>`;
+    for(let d=1; d<=daysInMonth; d++){
+      const iso = toLocalISODate(new Date(year,month,d));
+      const evs = calCache.filter(e=>e.date===iso);
+      const isToday = iso===offsetDate(0);
+      cells += `<div class="cal-month-cell" data-date="${iso}" style="cursor:pointer;background:${isToday?'var(--marigold-tint)':'var(--surface)'};border:1px solid var(--border);border-radius:4px;padding:6px;min-height:70px;font-size:.72rem;">
+        <div style="font-weight:700;margin-bottom:3px;">${d}</div>
+        ${evs.slice(0,3).map(e=>`<div class="badge badge-navy cal-month-event" data-event-id="${e.id}" style="display:block;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;">${escapeHtml(e.title)}</div>`).join('')}
+        ${evs.length>3?`<div class="muted">+${evs.length-3} more</div>`:''}
+      </div>`;
+    }
+    body.innerHTML = `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px;">
+      ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="small" style="text-align:center;font-weight:700;">${d}</div>`).join('')}${cells}
+    </div>`;
+    body.querySelectorAll('.cal-month-event').forEach(el=>el.addEventListener('click', (ev)=>{ ev.stopPropagation(); openEventModal(el.dataset.eventId); }));
+    body.querySelectorAll('.cal-month-cell').forEach(el=>el.addEventListener('click', ()=>{ openEventModal(null, el.dataset.date); }));
+  }
+}
+function calRow(e){
+  return `<tr><td class="mono">${e.time}</td><td>${escapeHtml(e.title)}</td><td>${escapeHtml(e.location||'')}</td>
+    <td class="row-actions"><button class="link-btn" onclick="openEventModal('${e.id}')">Edit</button><button class="link-btn danger" onclick="deleteEvent('${e.id}')">Delete</button></td></tr>`;
+}
+function openEventModal(id, prefillDate){
+  const ev = id ? calCache.find(x=>x.id===id) : null;
+  openModal(`
+    <div class="modal-head"><h2>${ev?'Edit event':'Add calendar event'}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <div class="field"><label>Date</label><input type="date" id="fDate" value="${ev?ev.date:(prefillDate||calSelectedDate)}"></div>
+      <div class="field"><label>Time</label><input type="time" id="fTime" value="${ev?ev.time:'10:00'}"></div>
+      <div class="field full"><label>Title</label><input type="text" id="fTitle" value="${ev?escapeHtml(ev.title):''}" placeholder="e.g. Review meeting — CDMA works"></div>
+      <div class="field full"><label>Location</label><input type="text" id="fLoc" value="${ev?escapeHtml(ev.location||''):''}"></div>
+    </div></div>
+    <div class="modal-foot">${ev?`<button class="btn btn-danger" onclick="deleteEventFromModal('${id}')" style="margin-right:auto;">Delete</button>`:''}<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveEvent('${id||''}')">${ev?'Save changes':'Add event'}</button></div>`);
+}
+async function deleteEventFromModal(id){
+  if(!confirm('Delete this event? This cannot be undone.')) return;
+  const ev = calCache.find(x=>x.id===id);
+  const { error } = await supa.from('calendar_events').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted calendar event: ' + (ev?ev.title:id));
+  closeModal(); renderCalBody(); showToast('Event deleted.');
+}
+async function saveEvent(id){
+  const data = { date:document.getElementById('fDate').value, time:document.getElementById('fTime').value, title:document.getElementById('fTitle').value.trim(), location:document.getElementById('fLoc').value.trim() };
+  if(!data.title){ showToast('Please enter a title.'); return; }
+  const { error } = id
+    ? await supa.from('calendar_events').update(data).eq('id', id)
+    : await supa.from('calendar_events').insert({ ...data, done:false });
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  logAudit((id?'Updated':'Added') + ' calendar event: ' + data.title);
+  closeModal(); renderCalBody(); showToast(id?'Event updated.':'Event added — visible to all PSs.');
+}
+async function deleteEvent(id){
+  if(!confirm('Delete this event? This cannot be undone.')) return;
+  const ev = calCache.find(x=>x.id===id);
+  const { error } = await supa.from('calendar_events').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted calendar event: ' + (ev?ev.title:id));
+  showToast('Event deleted.'); renderCalBody();
+}
+
+/* =========================================================
+   3. TO-DOS
+========================================================= */
+const TODO_SOURCES = ['Call','Visit','Appointment request','Minister Sir Direction','Whatsapp Message','Email','Others'];
+function renderTodo(){
+  host().innerHTML = `
+    ${pageHead('To-Dos','Requests and messages arising from calls, visits, Minister\'s directions, or WhatsApp — logged by any PS, visible to all.', `<button class="btn btn-marigold" id="addTodoBtn">+ Log new item</button>`)}
+    <div class="toolbar">
+      <input type="search" id="todoSearch" placeholder="Search description or caller...">
+      <select id="todoFilterStatus"><option selected>Open</option><option>Done</option><option value="">All statuses</option></select>
+      <select id="todoFilterPriority"><option value="">All priorities</option><option>High</option><option>Medium</option><option>Low</option></select>
+    </div>
+    <div id="todoTableWrap"><div class="empty-note">Loading…</div></div>`;
+  document.getElementById('addTodoBtn').addEventListener('click', ()=>openTodoModal());
+  ['todoSearch','todoFilterStatus','todoFilterPriority'].forEach(id=>document.getElementById(id).addEventListener('input', renderTodoTable));
+  renderTodoTable();
+}
+let todosCache = [];
+async function renderTodoTable(){
+  const q = (document.getElementById('todoSearch').value||'').toLowerCase();
+  const fs = document.getElementById('todoFilterStatus').value; const fp = document.getElementById('todoFilterPriority').value;
+  const { data, error } = await supa.from('todos').select('*').order('created_at', {ascending:false});
+  const wrap = document.getElementById('todoTableWrap');
+  if(error){ wrap.innerHTML = `<div class="empty-note">Couldn't load to-dos (${escapeHtml(error.message)}).</div>`; return; }
+  todosCache = data;
+  const rows = data.filter(td => (!q || td.description.toLowerCase().includes(q) || td.created_by.toLowerCase().includes(q)) && (!fs || td.status===fs) && (!fp || td.priority===fp));
+  const pColor = p => p==='High'?'var(--red)':p==='Medium'?'var(--marigold)':'var(--green)';
+  wrap.innerHTML = `<div class="table-wrap"><table><thead><tr><th></th><th>Description</th><th>Source</th><th>Priority</th><th>Logged by</th><th>When</th><th>Status</th><th></th></tr></thead><tbody>
+  ${rows.length ? rows.map(td=>`
+    <tr><td><div class="chk ${td.status==='Done'?'checked':''}" onclick="toggleTodo('${td.id}','${td.status}')">${td.status==='Done'?'✓':''}</div></td>
+    <td style="${td.status==='Done'?'text-decoration:line-through;color:var(--ink-faint);':''}">${escapeHtml(td.description)}</td>
+    <td>${escapeHtml(td.source)}</td><td><span class="priority-dot" style="background:${pColor(td.priority)}"></span>${td.priority}</td>
+    <td>${escapeHtml(td.created_by)}</td><td class="small">${fmtDateTime(td.created_at)}</td>
+    <td><span class="badge ${td.status==='Done'?'badge-green':'badge-amber'}">${td.status}</span></td>
+    <td class="row-actions"><button class="link-btn" onclick="openTodoModal('${td.id}')">Edit</button><button class="link-btn danger" onclick="deleteTodo('${td.id}')">Delete</button></td></tr>`).join('') : `<tr><td colspan="8" class="empty-note">No matching items.</td></tr>`}
+  </tbody></table></div>`;
+}
+async function toggleTodo(id, curStatus){
+  const { error } = await supa.from('todos').update({ status: curStatus==='Done'?'Open':'Done' }).eq('id', id);
+  if(error){ showToast('Could not update: ' + error.message); return; }
+  renderTodoTable();
+}
+async function deleteTodo(id){
+  const { error } = await supa.from('todos').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted a to-do item');
+  renderTodoTable(); showToast('Item removed.');
+}
+function openTodoModal(id){
+  const td = id ? todosCache.find(x=>x.id===id) : null;
+  openModal(`
+    <div class="modal-head"><h2>${td?'Edit to-do':'Log a new to-do'}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Description / request</label><textarea id="tDesc" rows="3" placeholder="e.g. Convey message to Minister — request for...">${td?escapeHtml(td.description):''}</textarea></div>
+      <div class="form-grid">
+        <div class="field"><label>Source</label><select id="tSource">${TODO_SOURCES.map(s=>`<option ${td&&td.source===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        <div class="field"><label>Priority</label><select id="tPriority"><option ${td&&td.priority==='Medium'?'selected':''}>Medium</option><option ${td&&td.priority==='High'?'selected':''}>High</option><option ${td&&td.priority==='Low'?'selected':''}>Low</option></select></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveTodo('${id||''}')">${td?'Save changes':'Log item'}</button></div>`);
+}
+async function saveTodo(id){
+  const desc = document.getElementById('tDesc').value.trim();
+  if(!desc){ showToast('Please enter a description.'); return; }
+  const payload = { description:desc, source:document.getElementById('tSource').value, priority:document.getElementById('tPriority').value };
+  const { error } = id
+    ? await supa.from('todos').update(payload).eq('id', id)
+    : await supa.from('todos').insert({ ...payload, created_by: STATE.currentUser.name, status:'Open' });
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  logAudit((id?'Edited':'Logged') + ' a to-do: ' + desc.slice(0,80));
+  closeModal(); renderTodoTable(); showToast(id?'To-do updated.':'Logged — visible to all PSs.');
+}
+
+/* =========================================================
+   4. CONTACTS DIRECTORY (6 types + bulk upload)
+========================================================= */
+let contactCache = [];
+let contactActiveType = '';
+function renderContacts(){
+  host().innerHTML = `
+    ${pageHead('Contacts Directory','HoD central offices, regional offices, ULB functionaries, UDAs, CRDA/ADCL/AGICL, and contractors — searchable and click-to-call.',
+      `<button class="btn btn-ghost" id="templateBtn">⭳ Download CSV template</button> <button class="btn btn-ghost" id="bulkUploadBtn">⭱ Bulk upload</button> <button class="btn btn-marigold" id="addContactBtn">+ Add contact</button>`)}
+    <input type="file" id="bulkFile" accept=".csv" class="hidden">
+    <div class="toolbar" id="typeChips"></div>
+    <div class="toolbar">
+      <input type="search" id="cSearch" placeholder="Search name, jurisdiction, phone, designation, HoD...">
+      <select id="cJurFilter"><option value="">All jurisdictions</option></select>
+    </div>
+    <div class="card-grid" id="contactGrid"><div class="empty-note">Loading…</div></div>`;
+  contactActiveType = '';
+  const chipsEl = document.getElementById('typeChips');
+  chipsEl.innerHTML = ['All', ...CONTACT_TYPES].map(ty=>`<span class="type-chip ${ty==='All'?'active':''}" data-ty="${ty==='All'?'':ty}">${ty}</span>`).join('');
+  chipsEl.querySelectorAll('.type-chip').forEach(c=>c.addEventListener('click', ()=>{ chipsEl.querySelectorAll('.type-chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); contactActiveType = c.dataset.ty; renderContactGrid(); }));
+  document.getElementById('addContactBtn').addEventListener('click', ()=>openContactModal());
+  document.getElementById('cSearch').addEventListener('input', renderContactGrid);
+  document.getElementById('cJurFilter').addEventListener('change', renderContactGrid);
+  document.getElementById('templateBtn').addEventListener('click', downloadContactTemplate);
+  document.getElementById('bulkUploadBtn').addEventListener('click', ()=>document.getElementById('bulkFile').click());
+  document.getElementById('bulkFile').addEventListener('change', handleBulkUpload);
+  renderContactGrid();
+}
+async function renderContactGrid(){
+  const q = (document.getElementById('cSearch').value||'').toLowerCase();
+  const jurFilterVal = document.getElementById('cJurFilter').value;
+  const { data, error } = await supa.from('contacts').select('*').order('name');
+  const grid = document.getElementById('contactGrid');
+  if(error){ grid.innerHTML = `<div class="empty-note">Couldn't load contacts (${escapeHtml(error.message)}).</div>`; return; }
+  contactCache = data;
+  // keep the jurisdiction filter's option list in sync with what's actually in the data
+  const jurFilterEl = document.getElementById('cJurFilter');
+  const jurisdictions = [...new Set(data.map(c=>c.jurisdiction).filter(Boolean))].sort();
+  const currentSelection = jurFilterEl.value;
+  jurFilterEl.innerHTML = `<option value="">All jurisdictions</option>` + jurisdictions.map(j=>`<option ${j===currentSelection?'selected':''}>${escapeHtml(j)}</option>`).join('');
+  const rows = contactCache.filter(c => (!contactActiveType || c.type===contactActiveType) && (!jurFilterVal || c.jurisdiction===jurFilterVal)
+    && (!q || [c.name,c.jurisdiction,c.phone,c.alternate_phone,c.designation,c.hod_name].join(' ').toLowerCase().includes(q)));
+  grid.innerHTML = rows.length ? rows.map(c=>`
+    <div class="simple-card">
+      <span class="badge badge-navy" style="margin-bottom:6px;">${escapeHtml(c.type)}</span>
+      <h3>${escapeHtml(c.name)}</h3>
+      <div class="role">${escapeHtml(c.designation||'')}</div>
+      <div class="line">${escapeHtml(c.jurisdiction||'')}</div>
+      ${c.hod_name?`<div class="line">HoD: ${escapeHtml(c.hod_name)}</div>`:''}
+      <div class="line">📞 <a href="tel:${(c.phone||'').replace(/\s/g,'')}">${escapeHtml(c.phone||'')}</a></div>
+      ${c.alternate_phone?`<div class="line">📞 <a href="tel:${c.alternate_phone.replace(/\s/g,'')}">${escapeHtml(c.alternate_phone)}</a> <span class="small muted">(alt)</span></div>`:''}
+      ${c.email?`<div class="line">✉ ${escapeHtml(c.email)}</div>`:''}
+      ${c.notes?`<div class="line small" style="margin-top:6px;">${escapeHtml(c.notes)}</div>`:''}
+      <div class="actions"><button class="link-btn" onclick="openContactModal('${c.id}')">Edit</button><button class="link-btn danger" onclick="deleteContact('${c.id}')">Delete</button></div>
+    </div>`).join('') : `<div class="empty-note">No contacts match your search.</div>`;
+}
+function openContactModal(id){
+  const c = id ? contactCache.find(x=>x.id===id) : null;
+  openModal(`
+    <div class="modal-head"><h2>${c?'Edit contact':'Add contact'}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <div class="field full"><label>Contact type</label><select id="ctType">${CONTACT_TYPES.map(ty=>`<option ${c&&c.type===ty?'selected':''}>${ty}</option>`).join('')}</select></div>
+      <div class="field full"><label>Name</label><input id="ctName" value="${c?escapeHtml(c.name):''}"></div>
+      <div class="field"><label>Designation</label><input id="ctDesig" value="${c?escapeHtml(c.designation||''):''}" placeholder="e.g. Executive Engineer"></div>
+      <div class="field"><label>HoD Name</label><input id="ctHod" value="${c?escapeHtml(c.hod_name||''):''}" placeholder="e.g. Name of the Head of Department"></div>
+      <div class="field"><label>Jurisdiction / Office</label><input id="ctJur" value="${c?escapeHtml(c.jurisdiction||''):''}"></div>
+      <div class="field"><label>Phone</label><input id="ctPhone" value="${c?escapeHtml(c.phone||''):''}"></div>
+      <div class="field"><label>Alternate Phone</label><input id="ctAltPhone" value="${c?escapeHtml(c.alternate_phone||''):''}"></div>
+      <div class="field"><label>Email</label><input id="ctEmail" value="${c?escapeHtml(c.email||''):''}"></div>
+      <div class="field full"><label>Notes</label><textarea id="ctNotes" rows="2">${c?escapeHtml(c.notes||''):''}</textarea></div>
+    </div></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveContact('${id||''}')">${c?'Save changes':'Add contact'}</button></div>`);
+}
+async function saveContact(id){
+  const data = { type:document.getElementById('ctType').value, name:document.getElementById('ctName').value.trim(), designation:document.getElementById('ctDesig').value.trim(),
+    hod_name:document.getElementById('ctHod').value.trim(), jurisdiction:document.getElementById('ctJur').value.trim(), phone:document.getElementById('ctPhone').value.trim(),
+    alternate_phone:document.getElementById('ctAltPhone').value.trim(), email:document.getElementById('ctEmail').value.trim(), notes:document.getElementById('ctNotes').value.trim() };
+  if(!data.name){ showToast('Please enter a name.'); return; }
+  const { error } = id ? await supa.from('contacts').update(data).eq('id', id) : await supa.from('contacts').insert(data);
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  logAudit((id?'Updated':'Added') + ' contact: ' + data.name);
+  closeModal(); renderContactGrid(); showToast(id?'Contact updated.':'Contact added.');
+}
+async function deleteContact(id){
+  const c = contactCache.find(x=>x.id===id);
+  const { error } = await supa.from('contacts').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted contact: ' + (c?c.name:id));
+  renderContactGrid(); showToast('Contact removed.');
+}
+function downloadContactTemplate(){
+  const header = 'Type,Name,Designation,HoD Name,Jurisdiction/Organisation,Phone,Alternate Phone,Email,Notes';
+  const example1 = 'ULB Functionary,K. Suresh Babu,Municipal Commissioner,,Vijayawada Municipal Corporation,+91 98480 11223,,commr.vmc@ap.gov.in,';
+  const example2 = ',M/s ABC Constructions,Contractor,,Guntur Municipal Corporation,+91 90000 00000,,,Leave Type blank to auto-detect';
+  downloadText('PESHI_contacts_template.csv', [header, example1, example2].join('\n'));
+  showToast('Template downloaded.');
+}
+function inferContactType(designation, jurisdiction){
+  const s = (designation + ' ' + jurisdiction).toLowerCase();
+  if(s.includes('contractor')) return 'Contractor';
+  if(s.includes('crda') || s.includes('adcl') || s.includes('agicl')) return 'CRDA/ADCL/AGICL';
+  if(s.includes('urban development authority') || /\buda\b/.test(s)) return 'Urban Development Authority';
+  if(s.includes('rdma') || s.includes('regional')) return 'Regional Office';
+  if(s.includes('municipal corporation') || s.includes('municipality') || s.includes('commissioner') || s.includes('town planning') || s.includes('mepma')) return 'ULB Functionary';
+  return 'HoD Central Office';
+}
+function handleBulkUpload(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(evt){
+    const lines = evt.target.result.split(/\r?\n/).filter(l=>l.trim().length);
+    if(lines.length < 2){ showToast('No data rows found in file.'); return; }
+    const headers = lines[0].split(',').map(h=>h.trim().toLowerCase());
+    const newRows = [];
+    for(let i=1;i<lines.length;i++){
+      const cols = lines[i].split(',');
+      const row = {}; headers.forEach((h,idx)=> row[h] = (cols[idx]||'').trim());
+      const name = row['name']; if(!name) continue;
+      const designation = row['designation']||''; const jurisdiction = row['jurisdiction/organisation']||row['jurisdiction']||'';
+      let type = row['type']; if(!type || !CONTACT_TYPES.includes(type)) type = inferContactType(designation, jurisdiction);
+      newRows.push({ type, name, designation, hod_name: row['hod name']||row['hod_name']||'', jurisdiction, phone:row['phone']||'',
+        alternate_phone: row['alternate phone']||row['alternate_phone']||'', email:row['email']||'', notes:row['notes']||'' });
+    }
+    if(!newRows.length){ showToast('No valid rows found (each row needs at least a Name).'); return; }
+    const { error } = await supa.from('contacts').insert(newRows);
+    if(error){ showToast('Import failed: ' + error.message); return; }
+    logAudit(`Bulk-imported ${newRows.length} contact(s)`);
+    renderContactGrid(); showToast(`${newRows.length} contact(s) imported — types auto-detected where left blank.`);
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+/* =========================================================
+   5. MEETINGS & MoM  (rich text notes, action-item bookmarking, advanced search, print/PDF)
+========================================================= */
+const ATTACHMENTS_BUCKET = 'attachments';
+function sanitizeFileName(name){ return name.replace(/[^a-zA-Z0-9.\-_]/g, '_'); }
+async function uploadAttachmentsToStorage(ownerType, ownerId, fileList, uploadedBy){
+  const files = Array.from(fileList || []);
+  for(const file of files){
+    const path = `${ownerType}/${ownerId}/${Date.now()}-${sanitizeFileName(file.name)}`;
+    const { error: upErr } = await supa.storage.from(ATTACHMENTS_BUCKET).upload(path, file);
+    if(upErr){ showToast(`Could not upload ${file.name}: ${upErr.message}`); continue; }
+    await supa.from('attachments').insert({ owner_type: ownerType, owner_id: ownerId, file_name: file.name, file_size: file.size, storage_path: path, uploaded_by: uploadedBy });
+    logAudit('Uploaded document: ' + file.name);
+  }
+}
+async function fetchAttachmentsWithUrls(ownerType, ownerId){
+  const { data, error } = await supa.from('attachments').select('*').eq('owner_type', ownerType).eq('owner_id', ownerId).order('uploaded_at');
+  if(error || !data || !data.length) return [];
+  const withUrls = await Promise.all(data.map(async a=>{
+    const { data: signed } = await supa.storage.from(ATTACHMENTS_BUCKET).createSignedUrl(a.storage_path, 3600);
+    return { id: a.id, name: a.file_name, size: a.file_size, url: signed ? signed.signedUrl : '#', storage_path: a.storage_path };
+  }));
+  return withUrls;
+}
+function attachmentsListWithDeleteHtml(atts, refreshFnName, refreshArg){
+  if(!atts || !atts.length) return `<span class="small muted">No documents attached.</span>`;
+  return `<div class="attachment-list">` + atts.map(a=>`
+    <div style="display:flex;align-items:center;gap:8px;">
+      <a href="${a.url}" target="_blank" rel="noopener" class="attachment-chip">📎 ${escapeHtml(a.name)} <span class="muted">(${fileSize(a.size)})</span></a>
+      <button class="link-btn danger" onclick="deleteAttachmentById('${a.id}','${a.storage_path}','${refreshFnName}',${refreshArg!==undefined?`'${refreshArg}'`:'undefined'})" style="padding:0;">Delete</button>
+    </div>`).join('') + `</div>`;
+}
+async function deleteAttachmentById(attachmentId, storagePath, refreshFnName, refreshArg){
+  if(!confirm('Delete this document? This cannot be undone.')) return;
+  await supa.storage.from(ATTACHMENTS_BUCKET).remove([storagePath]);
+  await supa.from('attachments').delete().eq('id', attachmentId);
+  logAudit('Deleted a document attachment');
+  showToast('Document deleted.');
+  if(refreshFnName && typeof window[refreshFnName]==='function') window[refreshFnName](refreshArg);
+}
+
+let currentMomDetailId = null;
+let currentMomData = null;
+function renderMom(){
+  host().innerHTML = `
+    ${pageHead('Meetings & Minutes of Meeting','The core record of the peshi — structured, searchable meeting minutes with bookmarked action items feeding the deadline tracker.', `<button class="btn btn-marigold" id="addMomBtn">+ New meeting record</button>`)}
+    <div class="toolbar">
+      <input type="search" id="momSearch" placeholder="Search subject, department/ULB, attendees, or notes...">
+      <input type="date" id="momFrom" title="From date">
+      <input type="date" id="momTo" title="To date">
+      <label class="chk-label"><input type="checkbox" id="momPendingOnly" style="width:auto;"> Only pending action items</label>
+    </div>
+    <div id="momList"><div class="empty-note">Loading…</div></div>`;
+  document.getElementById('addMomBtn').addEventListener('click', ()=>openMomModal());
+  ['momSearch','momFrom','momTo','momPendingOnly'].forEach(id=>document.getElementById(id).addEventListener('input', renderMomList));
+  renderMomList();
+}
+async function renderMomList(){
+  const q = (document.getElementById('momSearch').value||'').toLowerCase();
+  const from = document.getElementById('momFrom').value; const to = document.getElementById('momTo').value;
+  const pendingOnly = document.getElementById('momPendingOnly').checked;
+  const listEl = document.getElementById('momList');
+  const { data, error } = await supa.from('meetings').select('*, action_items(*)').order('date', {ascending:false});
+  if(error){ listEl.innerHTML = `<div class="empty-note">Couldn't load meetings (${escapeHtml(error.message)}).</div>`; return; }
+  const rows = data.filter(m => {
+    const items = m.action_items || [];
+    const haystack = [m.subject, m.dept_ulb, m.attendees, stripHtml(m.notes_html), items.map(a=>a.description).join(' ')].join(' ').toLowerCase();
+    if(q && !haystack.includes(q)) return false;
+    if(from && m.date < from) return false;
+    if(to && m.date > to) return false;
+    if(pendingOnly && !items.some(a=>a.status!=='Done')) return false;
+    return true;
+  });
+  listEl.innerHTML = rows.length ? rows.map(m=>{
+    const items = m.action_items || [];
+    return `
+    <div class="tab-card navy" data-tab="${fmtDate(m.date)}" style="margin-top:26px;">
+      <div class="tab-card-body">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div><h3 style="margin:0 0 3px;font-family:var(--font-serif);font-size:1.02rem;">${escapeHtml(m.subject)}</h3>
+          <div class="small">${escapeHtml(m.dept_ulb||'')} · Attendees: ${escapeHtml(m.attendees||'')}</div></div>
+        </div>
+        <div class="notes-preview" style="margin:10px 0 8px;">${m.notes_html||''}</div>
+        <div class="row-actions">
+          <button class="link-btn" onclick="openMomDetail('${m.id}')">Open full record →</button>
+          ${items.length ? `<span class="small">${items.filter(a=>a.status!=='Done').length} pending action item(s)</span>` : ''}
+          <button class="link-btn danger" onclick="deleteMeeting('${m.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty-note" style="margin-top:20px;">No meeting records match your search.</div>`;
+}
+function openMomModal(){
+  window.__pendingActionItems = [];
+  openModal(`
+    <div class="modal-head"><h2>New meeting record</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field"><label>Date</label><input type="date" id="mDate" value="${offsetDate(0)}"></div>
+        <div class="field"><label>Department / ULB</label><input id="mDeptUlb" placeholder="e.g. PHEnC / Vijayawada Municipal Corporation"></div>
+        <div class="field full"><label>Subject</label><input id="mSubject" placeholder="e.g. Review of UGD works, Vijayawada"></div>
+        <div class="field full"><label>Attendees</label><input id="mAttendees" placeholder="e.g. PS, Commissioner, SE"></div>
+      </div>
+      <div class="field full">
+        <label>Discussion notes</label>
+        ${rteToolbarHtml('mNotes')}
+        <div id="mNotes" class="rte" contenteditable="true" data-placeholder="Type notes here — bold, underline, highlight, insert tables; type a few letters for word suggestions; select text and click 'Mark action item' to bookmark it."></div>
+      </div>
+      <div id="pendingAiPreview" style="margin-top:10px;"></div>
+      <div class="field full" style="margin-top:14px;"><label>Supporting documents (optional)</label><input type="file" id="mAttachments" multiple></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" id="saveMomBtn" onclick="saveMom()">Save record</button></div>`, true);
+  setupAutosuggest(document.getElementById('mNotes'));
+  setupSmartPaste(document.getElementById('mNotes'));
+  window.__refreshActionItemPreview = function(){
+    const el = document.getElementById('pendingAiPreview'); if(!el) return;
+    const items = window.__pendingActionItems || [];
+    el.innerHTML = items.length ? `<div class="small" style="font-weight:700;margin-bottom:4px;">Bookmarked action items (${items.length})</div>` +
+      items.map(a=>`<div class="action-item-row"><div class="ai-desc">${escapeHtml(a.desc)}</div><div class="ai-meta">${escapeHtml(a.officer)} · Due ${fmtDate(a.deadline)}</div></div>`).join('') : '';
+  };
+}
+async function saveMom(){
+  const subject = document.getElementById('mSubject').value.trim();
+  if(!subject){ showToast('Please enter a subject.'); return; }
+  const notesHtml = document.getElementById('mNotes').innerHTML;
+  const actionItems = window.__pendingActionItems || [];
+  const fileList = document.getElementById('mAttachments').files;
+  const btn = document.getElementById('saveMomBtn'); btn.disabled = true; btn.textContent = 'Saving…';
+
+  const { data: meeting, error } = await supa.from('meetings').insert({
+    date: document.getElementById('mDate').value, subject, dept_ulb: document.getElementById('mDeptUlb').value.trim()||'—',
+    attendees: document.getElementById('mAttendees').value.trim()||'—', notes_html: notesHtml
+  }).select().single();
+  if(error){ showToast('Could not save: ' + error.message); btn.disabled = false; btn.textContent = 'Save record'; return; }
+
+  if(actionItems.length){
+    await supa.from('action_items').insert(actionItems.map(a=>({ meeting_id: meeting.id, description: a.desc, officer: a.officer, deadline: a.deadline, status:'Open' })));
+    await supa.from('deadlines').insert(actionItems.map(a=>({ description: a.desc, officer: a.officer, hod_name:'—', due_date: a.deadline, status:'Open', linked_meeting: subject })));
+  }
+  if(fileList && fileList.length){
+    await uploadAttachmentsToStorage('meeting', meeting.id, fileList, STATE.currentUser.name);
+  }
+  window.__pendingActionItems = []; window.__refreshActionItemPreview = null;
+  logAudit('Saved meeting record: ' + subject + (actionItems.length?` (${actionItems.length} action item(s) added)`:''));
+  closeModal(); renderMomList(); refreshNavBadges();
+  showToast('Meeting record saved' + (actionItems.length?` — ${actionItems.length} action item(s) added to the tracker.`:'.'));
+}
+async function openMomDetail(id){
+  currentMomDetailId = id;
+  const [{ data: m, error }, { data: items }, atts] = await Promise.all([
+    supa.from('meetings').select('*').eq('id', id).single(),
+    supa.from('action_items').select('*').eq('meeting_id', id).order('deadline'),
+    fetchAttachmentsWithUrls('meeting', id)
+  ]);
+  if(error || !m){ showToast('Could not load that meeting record.'); return; }
+  currentMomData = m;
+  closeModal(); // replace any currently-open MoM modal (e.g. returning from Edit) rather than stacking on top of it
+  openModal(`
+    <div class="modal-head"><h2>Meeting Record</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="mom-meta">
+        <div><b>Subject:</b> ${escapeHtml(m.subject)}</div>
+        <div><b>Date:</b> ${fmtDate(m.date)}</div>
+        <div><b>Department / ULB:</b> ${escapeHtml(m.dept_ulb||'—')}</div>
+        <div><b>Attendees:</b> ${escapeHtml(m.attendees||'—')}</div>
+      </div>
+      <div class="section-title" style="margin-top:6px;font-size:.9rem;">Discussion notes</div>
+      <div class="rte" style="max-height:none;">${m.notes_html||''}</div>
+      <div class="section-title" style="font-size:.9rem;">Action items</div>
+      ${items && items.length ? items.map(a=>`
+        <div class="action-item-row">
+          <div class="ai-desc">${escapeHtml(a.description)}</div>
+          <div class="ai-meta">${escapeHtml(a.officer||'')} · Due ${fmtDate(a.deadline)} · <span class="badge ${a.status==='Done'?'badge-green':'badge-amber'}">${a.status}</span>
+          ${a.status!=='Done' ? `<button class="link-btn no-print" onclick="markMomActionDone('${a.id}')">Mark done</button>`:''}
+          <button class="link-btn danger no-print" onclick="deleteMomActionItem('${a.id}')">Delete</button></div>
+        </div>`).join('') : `<div class="empty-note">No action items bookmarked for this meeting.</div>`}
+      <div class="section-title" style="font-size:.9rem;">Supporting documents</div>
+      ${attachmentsListWithDeleteHtml(atts, 'openMomDetail', id)}
+      <div class="field full no-print" style="margin-top:12px;"><label>Add more documents</label><input type="file" id="mAddAttachments" multiple></div>
+      <button class="btn btn-ghost btn-sm no-print" onclick="addMoreAttachments('${id}')">Upload</button>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost no-print" onclick="closeModal()">Close</button><button class="btn btn-ghost no-print" onclick="openMomEditForm()">Edit</button><button class="btn btn-danger no-print" onclick="deleteMeeting('${id}')">Delete meeting</button><button class="btn btn-primary no-print" onclick="window.print()">🖶 Print / Save as PDF</button></div>`, true);
+}
+function openMomEditForm(){
+  const m = currentMomData;
+  if(!m) return;
+  window.__pendingActionItems = [];
+  closeModal(); // replace the detail view rather than stacking the edit form on top of it
+  openModal(`
+    <div class="modal-head"><h2>Edit meeting record</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field"><label>Date</label><input type="date" id="emDate" value="${m.date}"></div>
+        <div class="field"><label>Department / ULB</label><input id="emDeptUlb" value="${escapeHtml(m.dept_ulb||'')}"></div>
+        <div class="field full"><label>Subject</label><input id="emSubject" value="${escapeHtml(m.subject)}"></div>
+        <div class="field full"><label>Attendees</label><input id="emAttendees" value="${escapeHtml(m.attendees||'')}"></div>
+      </div>
+      <div class="field full">
+        <label>Discussion notes</label>
+        ${rteToolbarHtml('emNotes')}
+        <div id="emNotes" class="rte" contenteditable="true">${m.notes_html||''}</div>
+      </div>
+      <div id="pendingAiPreview" style="margin-top:10px;"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="openMomDetail('${m.id}')">Cancel</button><button class="btn btn-primary" onclick="saveMomEdit('${m.id}')">Save changes</button></div>`, true);
+  setupAutosuggest(document.getElementById('emNotes'));
+  setupSmartPaste(document.getElementById('emNotes'));
+  window.__refreshActionItemPreview = function(){
+    const el = document.getElementById('pendingAiPreview'); if(!el) return;
+    const newItems = window.__pendingActionItems || [];
+    el.innerHTML = newItems.length ? `<div class="small" style="font-weight:700;margin-bottom:4px;">New action items to add (${newItems.length})</div>` +
+      newItems.map(a=>`<div class="action-item-row"><div class="ai-desc">${escapeHtml(a.desc)}</div><div class="ai-meta">${escapeHtml(a.officer)} · Due ${fmtDate(a.deadline)}</div></div>`).join('') : '';
+  };
+}
+async function saveMomEdit(id){
+  const subject = document.getElementById('emSubject').value.trim();
+  if(!subject){ showToast('Please enter a subject.'); return; }
+  const newActionItems = window.__pendingActionItems || [];
+  const payload = {
+    date: document.getElementById('emDate').value,
+    dept_ulb: document.getElementById('emDeptUlb').value.trim()||'—',
+    subject,
+    attendees: document.getElementById('emAttendees').value.trim()||'—',
+    notes_html: document.getElementById('emNotes').innerHTML
+  };
+  const { error } = await supa.from('meetings').update(payload).eq('id', id);
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  if(newActionItems.length){
+    await supa.from('action_items').insert(newActionItems.map(a=>({ meeting_id: id, description: a.desc, officer: a.officer, deadline: a.deadline, status:'Open' })));
+    await supa.from('deadlines').insert(newActionItems.map(a=>({ description: a.desc, officer: a.officer, hod_name:'—', due_date: a.deadline, status:'Open', linked_meeting: subject })));
+  }
+  window.__pendingActionItems = []; window.__refreshActionItemPreview = null;
+  logAudit('Edited meeting record: ' + subject);
+  showToast('Meeting record updated' + (newActionItems.length?` — ${newActionItems.length} new action item(s) added.`:'.'));
+  renderMomList(); refreshNavBadges();
+  openMomDetail(id);
+}
+async function addMoreAttachments(meetingId){
+  const files = document.getElementById('mAddAttachments').files;
+  if(!files || !files.length){ showToast('Choose a file first.'); return; }
+  await uploadAttachmentsToStorage('meeting', meetingId, files, STATE.currentUser.name);
+  showToast('Document(s) uploaded.');
+  openMomDetail(meetingId);
+}
+async function markMomActionDone(actionItemId){
+  const { error } = await supa.from('action_items').update({ status:'Done' }).eq('id', actionItemId);
+  if(error){ showToast('Could not update: ' + error.message); return; }
+  logAudit('Marked a meeting action item done');
+  showToast('Action item marked done.');
+  if(currentMomDetailId) openMomDetail(currentMomDetailId);
+  renderMomList();
+}
+async function deleteMomActionItem(actionItemId){
+  if(!confirm('Delete this action item? This cannot be undone.')) return;
+  const { error } = await supa.from('action_items').delete().eq('id', actionItemId);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted a meeting action item');
+  showToast('Action item deleted.');
+  if(currentMomDetailId) openMomDetail(currentMomDetailId);
+  renderMomList();
+}
+async function deleteMeeting(id){
+  if(!confirm('Delete this entire meeting record, including its action items and documents? This cannot be undone.')) return;
+  const atts = await fetchAttachmentsWithUrls('meeting', id);
+  if(atts.length){
+    await supa.storage.from(ATTACHMENTS_BUCKET).remove(atts.map(a=>a.storage_path));
+    await supa.from('attachments').delete().eq('owner_type','meeting').eq('owner_id', id);
+  }
+  const { error } = await supa.from('meetings').delete().eq('id', id); // action_items cascade automatically
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted a meeting record');
+  currentMomDetailId = null;
+  closeModal(); renderMomList(); refreshNavBadges(); showToast('Meeting record deleted.');
+}
+
+/* =========================================================
+   6. e-OFFICE FILES (Routine vs Important)
+========================================================= */
+let eofficeView = 'important';
+let eofficeCache = [];
+function renderEoffice(){
+  host().innerHTML = `
+    ${pageHead('e-Office File Tracker','Important/Cabinet files carry status, a rich summary, and remarks for close tracking; routine files are logged for quick reference.', `<button class="btn btn-marigold" id="addFileBtn">+ Log file</button>`)}
+    <div class="tabs-row">
+      <button data-ev="important" class="${eofficeView==='important'?'active':''}">Important / Cabinet Files</button>
+      <button data-ev="routine" class="${eofficeView==='routine'?'active':''}">Routine Files</button>
+    </div>
+    <div class="toolbar"><input type="search" id="eSearch" placeholder="Search file number or subject..."></div>
+    <div id="eBody"><div class="empty-note">Loading…</div></div>`;
+  document.getElementById('addFileBtn').addEventListener('click', ()=>openFileModal());
+  host().querySelectorAll('[data-ev]').forEach(b=>b.addEventListener('click', ()=>{ eofficeView=b.dataset.ev; renderEofficeBody(); }));
+  document.getElementById('eSearch').addEventListener('input', renderEofficeBody);
+  renderEofficeBody();
+}
+async function renderEofficeBody(){
+  const q = (document.getElementById('eSearch').value||'').toLowerCase();
+  const el = document.getElementById('eBody');
+  host().querySelectorAll('[data-ev]').forEach(b=>b.classList.toggle('active', b.dataset.ev===eofficeView));
+  const { data, error } = await supa.from('eoffice_files').select('*').eq('category', eofficeView==='important'?'Important':'Routine').order('file_number');
+  if(error){ el.innerHTML = `<div class="empty-note">Couldn't load files (${escapeHtml(error.message)}).</div>`; return; }
+  eofficeCache = data;
+  const rows = data.filter(f => !q || [f.file_number,f.subject,f.department].join(' ').toLowerCase().includes(q));
+  const previewOf = html => { const t = stripHtml(html||''); return t ? (t.length>90 ? escapeHtml(t.slice(0,90))+'…' : escapeHtml(t)) : '<span class="small muted">No summary yet.</span>'; };
+  if(eofficeView==='important'){
+    el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>File No.</th><th>Subject</th><th>Department</th><th>Status</th><th>Last moved</th><th>Summary of file contents</th><th></th></tr></thead><tbody>
+      ${rows.length ? rows.map(f=>`
+        <tr><td class="mono">${escapeHtml(f.file_number||'')}</td><td>${escapeHtml(f.subject)}</td><td>${escapeHtml(f.department||'')}</td><td>${escapeHtml(f.status||'')}</td>
+        <td class="small">${f.last_moved?fmtDate(f.last_moved):''}</td>
+        <td style="max-width:260px;">${previewOf(f.remarks)}</td>
+        <td class="row-actions"><button class="link-btn" onclick="openFileDetailModal('${f.id}')">View / Edit</button><button class="link-btn danger" onclick="deleteEofficeFile('${f.id}')">Delete</button></td></tr>`).join('') : `<tr><td colspan="7" class="empty-note">No important files match your search.</td></tr>`}
+    </tbody></table></div>`;
+  } else {
+    el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>File No.</th><th>Subject</th><th>Department</th><th>Received on</th><th>Summary of file contents</th><th></th></tr></thead><tbody>
+      ${rows.length ? rows.map(f=>`<tr><td class="mono">${escapeHtml(f.file_number||'')}</td><td>${escapeHtml(f.subject)}</td><td>${escapeHtml(f.department||'')}</td><td class="small">${f.received_on?fmtDate(f.received_on):''}</td><td style="max-width:320px;">${previewOf(f.summary)}</td>
+        <td class="row-actions"><button class="link-btn" onclick="openFileDetailModal('${f.id}')">View / Edit</button><button class="link-btn danger" onclick="deleteEofficeFile('${f.id}')">Delete</button></td></tr>`).join('') : `<tr><td colspan="6" class="empty-note">No routine files match your search.</td></tr>`}
+    </tbody></table></div>`;
+  }
+}
+function openFileDetailModal(id){
+  const f = eofficeCache.find(x=>x.id===id);
+  if(!f) return;
+  const isImportant = f.category==='Important';
+  const summaryField = isImportant ? 'remarks' : 'summary';
+  const summaryHtml = legacyTextToHtml(f[summaryField]);
+  openModal(`
+    <div class="modal-head"><h2>${escapeHtml(f.file_number||'File details')}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field"><label>File number</label><input id="fdNum" value="${escapeHtml(f.file_number||'')}"></div>
+        <div class="field"><label>Department</label><input id="fdDept" value="${escapeHtml(f.department||'')}"></div>
+        <div class="field full"><label>Subject</label><input id="fdSubj" value="${escapeHtml(f.subject||'')}"></div>
+        ${isImportant
+          ? `<div class="field full"><label>Current status</label><input id="fdStatus" value="${escapeHtml(f.status||'')}"></div>`
+          : `<div class="field"><label>Received on</label><input type="date" id="fdReceived" value="${f.received_on||''}"></div>`}
+      </div>
+      <div class="field full">
+        <label>Summary of file contents</label>
+        ${rteToolbarHtml('fdSummary', false)}
+        <div id="fdSummary" class="rte" contenteditable="true" style="min-height:220px;max-height:420px;">${summaryHtml}</div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost no-print" onclick="closeModal()">Cancel</button><button class="btn btn-danger no-print" onclick="deleteEofficeFile('${id}')" style="margin-right:auto;">Delete</button><button class="btn btn-primary no-print" onclick="saveFileDetail('${id}')">Save changes</button><button class="btn btn-primary no-print" onclick="window.print()">🖶 Print / Save as PDF</button></div>`, true);
+  setupAutosuggest(document.getElementById('fdSummary'));
+  setupSmartPaste(document.getElementById('fdSummary'));
+}
+async function saveFileDetail(id){
+  const f = eofficeCache.find(x=>x.id===id);
+  if(!f) return;
+  const isImportant = f.category==='Important';
+  const subject = document.getElementById('fdSubj').value.trim();
+  if(!subject){ showToast('Please enter a subject.'); return; }
+  const summaryHtml = document.getElementById('fdSummary').innerHTML;
+  const payload = {
+    file_number: document.getElementById('fdNum').value.trim()||f.file_number,
+    department: document.getElementById('fdDept').value.trim()||'—',
+    subject,
+  };
+  if(isImportant){ payload.status = document.getElementById('fdStatus').value.trim()||f.status; payload.remarks = summaryHtml; }
+  else { payload.received_on = document.getElementById('fdReceived').value; payload.summary = summaryHtml; }
+  const { error } = await supa.from('eoffice_files').update(payload).eq('id', id);
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  logAudit('Updated e-Office file: ' + subject);
+  closeModal(); renderEofficeBody(); showToast('File updated.');
+}
+async function deleteEofficeFile(id){
+  if(!confirm('Delete this file record? This cannot be undone.')) return;
+  const f = eofficeCache.find(x=>x.id===id);
+  const { error } = await supa.from('eoffice_files').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted e-Office file: ' + (f?f.subject:id));
+  closeModal(); renderEofficeBody(); refreshNavBadges(); showToast('File record deleted.');
+}
+function openFileModal(){
+  openModal(`
+    <div class="modal-head"><h2>Log e-Office file</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field full"><label>File category</label>
+        <select id="fnCategory" onchange="toggleFileFields()"><option value="Important">Important / Cabinet file</option><option value="Routine">Routine file</option></select>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>File number</label><input id="fnNum" placeholder="MAUD/xxxx/2026"></div>
+        <div class="field"><label>Department</label><input id="fnDept"></div>
+        <div class="field full"><label>Subject</label><input id="fnSubj"></div>
+      </div>
+      <div id="fieldsImportant">
+        <div class="form-grid">
+          <div class="field full"><label>Current status</label><input id="fnStatus" placeholder="e.g. Pending Minister approval"></div>
+        </div>
+      </div>
+      <div id="fieldsRoutine" class="hidden">
+        <div class="field"><label>Received on</label><input type="date" id="fnReceived" value="${offsetDate(0)}"></div>
+      </div>
+      <div class="field full">
+        <label>Summary of file contents</label>
+        ${rteToolbarHtml('fnSummary', false)}
+        <div id="fnSummary" class="rte" contenteditable="true" style="min-height:220px;max-height:420px;" data-placeholder="Brief summary of what the file is about..."></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveFile()">Save file</button></div>`, true);
+  setupAutosuggest(document.getElementById('fnSummary'));
+  setupSmartPaste(document.getElementById('fnSummary'));
+}
+function toggleFileFields(){
+  const cat = document.getElementById('fnCategory').value;
+  document.getElementById('fieldsImportant').classList.toggle('hidden', cat!=='Important');
+  document.getElementById('fieldsRoutine').classList.toggle('hidden', cat!=='Routine');
+}
+async function saveFile(){
+  const subject = document.getElementById('fnSubj').value.trim();
+  if(!subject){ showToast('Please enter a subject.'); return; }
+  const category = document.getElementById('fnCategory').value;
+  const summaryHtml = document.getElementById('fnSummary').innerHTML;
+  const base = { category, file_number:document.getElementById('fnNum').value.trim()||('MAUD/'+Math.floor(2000+Math.random()*300)+'/2026'), subject, department:document.getElementById('fnDept').value.trim()||'—' };
+  const row = category==='Important'
+    ? { ...base, status:document.getElementById('fnStatus').value.trim()||'Received', last_moved:offsetDate(0), remarks:summaryHtml }
+    : { ...base, received_on:document.getElementById('fnReceived').value, summary:summaryHtml };
+  const { error } = await supa.from('eoffice_files').insert(row);
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  logAudit(`Logged ${category.toLowerCase()} e-Office file: ${subject}`);
+  eofficeView = category.toLowerCase();
+  closeModal(); renderEoffice(); refreshNavBadges(); showToast('File logged.');
+}
+
+/* =========================================================
+   7. DEADLINE & WORKS TRACKER
+========================================================= */
+let deadlineView = 'table';
+const STAGES = ['Technical Sanction','Administrative Sanction','Tender Floated','Tender Closing','Technical Bid Opening','Financial Bid Opening','Letter of Acceptance','Work Closure'];
+let deadlinesCache = [];
+let workItemsCache = [];
+let deadlineFilterStatus = 'Open';
+function renderDeadlines(){
+  host().innerHTML = `
+    ${pageHead('Deadline & Works-Lifecycle Tracker','Minister\'s deadlines to HoDs, plus works tracked through the sanction → tender → completion lifecycle.', `<button class="btn btn-marigold" id="addDeadlineBtn">+ ${deadlineView==='table'?'Add deadline':'Add work item'}</button>`)}
+    <div class="tabs-row">
+      <button data-v="table" class="${deadlineView==='table'?'active':''}">Deadline register</button>
+      <button data-v="kanban" class="${deadlineView==='kanban'?'active':''}">Works lifecycle (kanban)</button>
+    </div>
+    ${deadlineView==='table' ? `<div class="toolbar"><input type="search" id="ddSearch" placeholder="Search description, officer, HoD..."></div>` : ''}
+    <div id="deadlineBody"><div class="empty-note">Loading…</div></div>`;
+  document.getElementById('addDeadlineBtn').addEventListener('click', ()=> deadlineView==='table' ? openDeadlineModal() : openWorkItemModal());
+  host().querySelectorAll('[data-v]').forEach(b=>b.addEventListener('click', ()=>{ deadlineView=b.dataset.v; renderDeadlines(); }));
+  if(deadlineView==='table') document.getElementById('ddSearch').addEventListener('input', renderDeadlineBody);
+  renderDeadlineBody();
+}
+async function renderDeadlineBody(){
+  const el = document.getElementById('deadlineBody');
+  if(deadlineView==='table'){
+    const { data, error } = await supa.from('deadlines').select('*').order('due_date');
+    if(error){ el.innerHTML = `<div class="empty-note">Couldn't load deadlines (${escapeHtml(error.message)}).</div>`; return; }
+    deadlinesCache = data;
+    const q = (document.getElementById('ddSearch')?.value||'').toLowerCase();
+    const filtered = data.filter(d => (!deadlineFilterStatus || d.status===deadlineFilterStatus) &&
+      (!q || [d.description,d.officer,d.hod_name,d.linked_meeting].join(' ').toLowerCase().includes(q)));
+    const rows = filtered.map(d=>({...d,du:daysUntil(d.due_date)})).sort((a,b)=> (a.status==='Done')-(b.status==='Done') || a.du-b.du);
+    el.innerHTML = `<div class="toolbar">
+        <select id="ddFilterStatus"><option ${deadlineFilterStatus==='Open'?'selected':''}>Open</option><option ${deadlineFilterStatus==='Done'?'selected':''}>Done</option><option value="" ${deadlineFilterStatus===''?'selected':''}>All statuses</option></select>
+        <select id="ddFilterOfficer"><option value="">All responsible officers</option>${[...new Set(data.map(d=>d.officer))].filter(Boolean).map(o=>`<option>${o}</option>`).join('')}</select>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Description</th><th>Responsible officer</th><th>HoD Name</th><th>Due date</th><th>Status</th><th>Linked MoM</th><th></th></tr></thead><tbody>
+      ${rows.length ? rows.map(d=>{ const badge = d.status==='Done' ? 'badge-green' : d.status==='Overdue'||d.du<0 ? 'badge-red' : d.du<=2 ? 'badge-amber' : 'badge-green';
+        const label = d.status==='Done' ? 'Done' : (d.du<0 ? `${Math.abs(d.du)}d overdue` : (d.du===0?'Due today':`In ${d.du}d`));
+        return `<tr><td>${escapeHtml(d.description)}</td><td>${escapeHtml(d.officer||'')}</td><td>${escapeHtml(d.hod_name||'—')}</td><td class="mono">${fmtDate(d.due_date)}</td>
+        <td><span class="badge ${badge}">${label}</span></td>
+        <td class="small">${escapeHtml(d.linked_meeting||'—')}</td>
+        <td class="row-actions">${d.status!=='Done'?`<button class="link-btn" onclick="markDeadlineDone('${d.id}')">Mark done</button>`:''}<button class="link-btn" onclick="openDeadlineModal('${d.id}')">Edit</button><button class="link-btn danger" onclick="deleteDeadline('${d.id}')">Delete</button></td></tr>`; }).join('') : `<tr><td colspan="7" class="empty-note">No deadlines match your filter.</td></tr>`}
+      </tbody></table></div>`;
+    document.getElementById('ddFilterStatus').addEventListener('change', function(){ deadlineFilterStatus = this.value; renderDeadlineBody(); });
+    const filterEl = document.getElementById('ddFilterOfficer');
+    if(filterEl) filterEl.addEventListener('change', function(){ const v = this.value; el.querySelectorAll('tbody tr').forEach(tr=>{ tr.style.display = (!v || tr.children[1].textContent===v) ? '' : 'none'; }); });
+  } else {
+    const { data, error } = await supa.from('work_items').select('*').order('due_date');
+    if(error){ el.innerHTML = `<div class="empty-note">Couldn't load work items (${escapeHtml(error.message)}).</div>`; return; }
+    workItemsCache = data;
+    el.innerHTML = `<div class="kanban">${STAGES.map(stage=>{
+      const items = data.filter(w=>w.stage===stage);
+      return `<div class="kanban-col"><h4>${stage} <span class="small">(${items.length})</span></h4>
+        ${items.map(w=>{ const overdue = daysUntil(w.due_date) < 0;
+          return `<div class="kanban-card ${overdue?'overdue':''}"><div class="kc-title">${escapeHtml(w.scheme)}</div><div class="kc-meta">${escapeHtml(w.ulb||'')}</div>
+            <div class="kc-meta mono" style="margin-top:4px;">${overdue?'Overdue since ':'Due '}${fmtDate(w.due_date)}</div>
+            ${w.details ? `<div class="kc-meta" style="margin-top:4px;white-space:normal;">${escapeHtml(w.details)}</div>` : ''}
+            <button class="link-btn danger" style="margin-top:6px;padding:0;" onclick="deleteWorkItem('${w.id}')">Delete</button></div>`; }).join('') || `<div class="small muted">No items</div>`}
+      </div>`; }).join('')}</div>`;
+  }
+}
+async function markDeadlineDone(id){
+  const { error } = await supa.from('deadlines').update({ status:'Done' }).eq('id', id);
+  if(error){ showToast('Could not update: ' + error.message); return; }
+  logAudit('Marked a deadline done');
+  renderDeadlineBody(); refreshNavBadges(); showToast('Deadline marked done.');
+}
+async function deleteDeadline(id){
+  if(!confirm('Delete this deadline? This cannot be undone.')) return;
+  const d = deadlinesCache.find(x=>x.id===id);
+  const { error } = await supa.from('deadlines').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted deadline: ' + (d?d.description:id));
+  renderDeadlineBody(); refreshNavBadges(); showToast('Deadline deleted.');
+}
+async function openDeadlineModal(id){
+  const d = id ? deadlinesCache.find(x=>x.id===id) : null;
+  const { data: meetings } = await supa.from('meetings').select('subject').order('date', {ascending:false});
+  openModal(`<div class="modal-head"><h2>${d?'Edit deadline':'Add deadline'}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body"><div class="field"><label>Description</label><textarea id="dDesc" rows="2">${d?escapeHtml(d.description):''}</textarea></div>
+      <div class="form-grid"><div class="field"><label>Responsible officer</label><input id="dOfficer" value="${d?escapeHtml(d.officer||''):''}"></div><div class="field"><label>HoD Name</label><input id="dHod" placeholder="e.g. Commissioner, GMC" value="${d&&d.hod_name!=='—'?escapeHtml(d.hod_name||''):''}"></div></div>
+      <div class="form-grid"><div class="field"><label>Due date</label><input type="date" id="dDue" value="${d?d.due_date:offsetDate(7)}"></div>
+      <div class="field"><label>Linked MoM (optional)</label><select id="dLinked"><option value="—">None</option>${(meetings||[]).map(m=>`<option ${d&&d.linked_meeting===m.subject?'selected':''}>${escapeHtml(m.subject)}</option>`).join('')}</select></div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveDeadline('${id||''}')">${d?'Save changes':'Add deadline'}</button></div>`);
+}
+async function saveDeadline(id){
+  const desc = document.getElementById('dDesc').value.trim(); if(!desc){ showToast('Please enter a description.'); return; }
+  const payload = { description:desc, officer:document.getElementById('dOfficer').value.trim()||'—', hod_name:document.getElementById('dHod').value.trim()||'—',
+    due_date:document.getElementById('dDue').value, linked_meeting:document.getElementById('dLinked').value };
+  const { error } = id
+    ? await supa.from('deadlines').update(payload).eq('id', id)
+    : await supa.from('deadlines').insert({ ...payload, status:'Open' });
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  logAudit((id?'Edited':'Added') + ' deadline: ' + desc);
+  closeModal(); renderDeadlineBody(); refreshNavBadges(); showToast(id?'Deadline updated.':'Deadline added.');
+}
+function openWorkItemModal(){
+  openModal(`<div class="modal-head"><h2>Add work item</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>ULB</label><input id="wUlb" placeholder="e.g. Vijayawada Municipal Corporation"></div>
+      <div class="field"><label>Scheme</label><input id="wScheme" placeholder="e.g. UGD Phase 2"></div>
+      <div class="form-grid"><div class="field"><label>Stage</label><select id="wStage">${STAGES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+      <div class="field"><label>Due date</label><input type="date" id="wDue" value="${offsetDate(14)}"></div></div>
+      <div class="field full"><label>Details / Notes (optional)</label><textarea id="wDetails" rows="2"></textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveWorkItem()">Add item</button></div>`);
+}
+async function saveWorkItem(){
+  const scheme = document.getElementById('wScheme').value.trim(); if(!scheme){ showToast('Please enter the scheme name.'); return; }
+  const { error } = await supa.from('work_items').insert({
+    ulb: document.getElementById('wUlb').value.trim()||'—', scheme, stage: document.getElementById('wStage').value, due_date: document.getElementById('wDue').value,
+    details: document.getElementById('wDetails').value.trim()
+  });
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  logAudit('Added work item: ' + scheme);
+  closeModal(); renderDeadlineBody(); showToast('Work item added.');
+}
+async function deleteWorkItem(id){
+  if(!confirm('Delete this work item? This cannot be undone.')) return;
+  const w = workItemsCache.find(x=>x.id===id);
+  const { error } = await supa.from('work_items').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted work item: ' + (w?w.scheme:id));
+  renderDeadlineBody(); showToast('Work item deleted.');
+}
+
+/* =========================================================
+   8. ESTABLISHMENT MATTERS (Transfers / Vacancies sub-screens)
+========================================================= */
+let estView = 'transfers';
+function renderEstablishment(){
+  host().innerHTML = `
+    ${pageHead('Establishment Matters','Transfer requests from officials across MA&UD, and vacancies in HoD offices, UDAs, or ULBs.', `<button class="btn btn-marigold" id="addEstBtn">+ ${estView==='transfers'?'Log transfer request':'Log vacancy'}</button>`)}
+    <div class="tabs-row">
+      <button data-ev="transfers" class="${estView==='transfers'?'active':''}">Transfers</button>
+      <button data-ev="vacancies" class="${estView==='vacancies'?'active':''}">Vacancies</button>
+    </div>
+    <div class="toolbar">
+      <input type="search" id="estSearch" placeholder="${estView==='transfers'?'Search name, designation, posting...':'Search post, office, details...'}">
+      <select id="estStatus"><option value="">All statuses</option><option>Open</option><option>Done</option></select>
+    </div>
+    <div id="estBody"><div class="empty-note">Loading…</div></div>`;
+  host().querySelectorAll('[data-ev]').forEach(b=>b.addEventListener('click', ()=>{ estView=b.dataset.ev; renderEstablishment(); }));
+  document.getElementById('addEstBtn').addEventListener('click', ()=> estView==='transfers' ? openTransferModal() : openVacancyModal());
+  document.getElementById('estStatus').addEventListener('change', renderEstBody);
+  document.getElementById('estSearch').addEventListener('input', renderEstBody);
+  renderEstBody();
+}
+let transfersCache = [];
+let vacanciesCache = [];
+async function renderEstBody(){
+  const st = document.getElementById('estStatus').value;
+  const q = (document.getElementById('estSearch').value||'').toLowerCase();
+  const el = document.getElementById('estBody');
+  if(estView==='transfers'){
+    let query = supa.from('transfers').select('*').order('request_received_on', {ascending:false});
+    if(st) query = query.eq('status', st);
+    const { data, error } = await query;
+    if(error){ el.innerHTML = `<div class="empty-note">Couldn't load transfers (${escapeHtml(error.message)}).</div>`; return; }
+    transfersCache = data;
+    const rows = data.filter(e => !q || [e.name,e.designation,e.current_posting,e.requested_posting,e.details].join(' ').toLowerCase().includes(q));
+    el.innerHTML = `<div class="table-wrap"><table><thead><tr><th></th><th>Name</th><th>Designation</th><th>Current Posting</th><th>Requested/Desired Posting</th><th>Request Received On</th><th>Details</th><th>Status</th><th></th></tr></thead><tbody>
+      ${rows.length ? rows.map(e=>`
+        <tr><td><div class="chk ${e.status==='Done'?'checked':''}" onclick="toggleTransferDone('${e.id}','${e.status}')">${e.status==='Done'?'✓':''}</div></td>
+        <td>${escapeHtml(e.name)}</td><td>${escapeHtml(e.designation||'')}</td><td>${escapeHtml(e.current_posting||'')}</td><td>${escapeHtml(e.requested_posting||'')}</td>
+        <td class="small">${e.request_received_on?fmtDate(e.request_received_on):''}</td><td style="max-width:260px;">${escapeHtml(e.details||'')}</td>
+        <td><span class="badge ${e.status==='Done'?'badge-green':'badge-grey'}">${e.status}</span></td>
+        <td class="row-actions"><button class="link-btn" onclick="openTransferModal('${e.id}')">Edit</button><button class="link-btn danger" onclick="deleteTransfer('${e.id}')">Delete</button></td></tr>`).join('') : `<tr><td colspan="9" class="empty-note">No transfer requests match your filter.</td></tr>`}
+    </tbody></table></div>`;
+  } else {
+    let query = supa.from('vacancies').select('*').order('vacant_since', {ascending:false});
+    if(st) query = query.eq('status', st);
+    const { data, error } = await query;
+    if(error){ el.innerHTML = `<div class="empty-note">Couldn't load vacancies (${escapeHtml(error.message)}).</div>`; return; }
+    vacanciesCache = data;
+    const rows = data.filter(e => !q || [e.post,e.office,e.details].join(' ').toLowerCase().includes(q));
+    el.innerHTML = `<div class="table-wrap"><table><thead><tr><th></th><th>Post</th><th>Office</th><th>Vacant Since</th><th>Details</th><th>Status</th><th></th></tr></thead><tbody>
+      ${rows.length ? rows.map(e=>`
+        <tr><td><div class="chk ${e.status==='Done'?'checked':''}" onclick="toggleVacancyDone('${e.id}','${e.status}')">${e.status==='Done'?'✓':''}</div></td>
+        <td>${escapeHtml(e.post)}</td><td>${escapeHtml(e.office||'')}</td><td class="small">${e.vacant_since?fmtDate(e.vacant_since):''}</td>
+        <td style="max-width:320px;">${escapeHtml(e.details||'')}</td>
+        <td><span class="badge ${e.status==='Done'?'badge-green':'badge-grey'}">${e.status}</span></td>
+        <td class="row-actions"><button class="link-btn" onclick="openVacancyModal('${e.id}')">Edit</button><button class="link-btn danger" onclick="deleteVacancy('${e.id}')">Delete</button></td></tr>`).join('') : `<tr><td colspan="7" class="empty-note">No vacancies match your filter.</td></tr>`}
+    </tbody></table></div>`;
+  }
+}
+async function toggleTransferDone(id, curStatus){
+  const { error } = await supa.from('transfers').update({ status: curStatus==='Done'?'Open':'Done' }).eq('id', id);
+  if(error){ showToast('Could not update: ' + error.message); return; }
+  renderEstBody(); refreshEstBadge();
+}
+async function toggleVacancyDone(id, curStatus){
+  const { error } = await supa.from('vacancies').update({ status: curStatus==='Done'?'Open':'Done' }).eq('id', id);
+  if(error){ showToast('Could not update: ' + error.message); return; }
+  renderEstBody(); refreshEstBadge();
+}
+async function deleteTransfer(id){
+  if(!confirm('Delete this transfer request? This cannot be undone.')) return;
+  const { error } = await supa.from('transfers').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted a transfer request');
+  renderEstBody(); refreshEstBadge(); showToast('Transfer request deleted.');
+}
+async function deleteVacancy(id){
+  if(!confirm('Delete this vacancy? This cannot be undone.')) return;
+  const { error } = await supa.from('vacancies').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted a vacancy');
+  renderEstBody(); refreshEstBadge(); showToast('Vacancy deleted.');
+}
+function openTransferModal(id){
+  const t = id ? transfersCache.find(x=>x.id===id) : null;
+  openModal(`<div class="modal-head"><h2>${t?'Edit transfer request':'Log transfer request'}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <div class="field full"><label>Name</label><input id="trName" value="${t?escapeHtml(t.name):''}"></div>
+      <div class="field"><label>Designation</label><input id="trDesig" placeholder="e.g. Executive Engineer" value="${t?escapeHtml(t.designation||''):''}"></div>
+      <div class="field"><label>Current posting</label><input id="trCurrent" placeholder="e.g. PHEnC, Kakinada" value="${t?escapeHtml(t.current_posting||''):''}"></div>
+      <div class="field"><label>Requested/Desired posting</label><input id="trRequested" placeholder="e.g. PHEnC, Vijayawada" value="${t?escapeHtml(t.requested_posting||''):''}"></div>
+      <div class="field"><label>Request received on</label><input type="date" id="trReceived" value="${t?t.request_received_on:offsetDate(0)}"></div>
+      <div class="field full"><label>Details</label><textarea id="trDetails" rows="2">${t?escapeHtml(t.details||''):''}</textarea></div>
+    </div></div>
+    <div class="modal-foot">${t?`<button class="btn btn-danger" onclick="deleteTransfer('${id}')" style="margin-right:auto;">Delete</button>`:''}<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveTransfer('${id||''}')">${t?'Save changes':'Save'}</button></div>`);
+}
+async function saveTransfer(id){
+  const name = document.getElementById('trName').value.trim(); if(!name){ showToast('Please enter the name.'); return; }
+  const payload = {
+    name, designation:document.getElementById('trDesig').value.trim()||'—', current_posting:document.getElementById('trCurrent').value.trim()||'—',
+    requested_posting:document.getElementById('trRequested').value.trim()||'—', request_received_on:document.getElementById('trReceived').value,
+    details:document.getElementById('trDetails').value.trim()
+  };
+  const { error } = id
+    ? await supa.from('transfers').update(payload).eq('id', id)
+    : await supa.from('transfers').insert({ ...payload, status:'Open' });
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  logAudit((id?'Edited':'Logged') + ' transfer request: ' + name);
+  closeModal(); renderEstBody(); refreshEstBadge(); showToast(id?'Transfer request updated.':'Transfer request logged.');
+}
+function openVacancyModal(id){
+  const v = id ? vacanciesCache.find(x=>x.id===id) : null;
+  openModal(`<div class="modal-head"><h2>${v?'Edit vacancy':'Log vacancy'}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Post</label><input id="vcPost" placeholder="e.g. Town Planning Officer" value="${v?escapeHtml(v.post):''}"></div>
+      <div class="field"><label>Office</label><input id="vcOffice" placeholder="e.g. Tirupati Municipal Corporation" value="${v?escapeHtml(v.office||''):''}"></div>
+      <div class="field"><label>Vacant since</label><input type="date" id="vcSince" value="${v?v.vacant_since:offsetDate(0)}"></div>
+      <div class="field full"><label>Details</label><textarea id="vcDetails" rows="2">${v?escapeHtml(v.details||''):''}</textarea></div>
+    </div>
+    <div class="modal-foot">${v?`<button class="btn btn-danger" onclick="deleteVacancy('${id}')" style="margin-right:auto;">Delete</button>`:''}<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveVacancy('${id||''}')">${v?'Save changes':'Save'}</button></div>`);
+}
+async function saveVacancy(id){
+  const post = document.getElementById('vcPost').value.trim(); if(!post){ showToast('Please enter the post.'); return; }
+  const payload = { post, office:document.getElementById('vcOffice').value.trim()||'—', vacant_since:document.getElementById('vcSince').value, details:document.getElementById('vcDetails').value.trim() };
+  const { error } = id
+    ? await supa.from('vacancies').update(payload).eq('id', id)
+    : await supa.from('vacancies').insert({ ...payload, status:'Open' });
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  logAudit((id?'Edited':'Logged') + ' vacancy: ' + post);
+  closeModal(); renderEstBody(); refreshEstBadge(); showToast(id?'Vacancy updated.':'Vacancy logged.');
+}
+async function refreshEstBadge(){
+  const [{ count: openTransfers }, { count: openVacancies }] = await Promise.all([
+    supa.from('transfers').select('*', { count:'exact', head:true }).eq('status','Open'),
+    supa.from('vacancies').select('*', { count:'exact', head:true }).eq('status','Open'),
+  ]);
+  navBadgeCounts.establishment = (openTransfers||0) + (openVacancies||0);
+  buildNav();
+}
+
+/* =========================================================
+   9. LEGISLATIVE MATTERS (new) — Bills & Questions
+========================================================= */
+let legView = 'bills';
+function renderLegislative(){
+  host().innerHTML = `
+    ${pageHead('Legislative Matters','Draft versions of MA&UD-related bills for the ensuing session, and questions from MLAs/MLCs to be answered by the Minister.',
+      `<button class="btn btn-marigold" id="addLegBtn">+ ${legView==='bills'?'New bill':'New question'}</button>`)}
+    <div class="tabs-row">
+      <button data-lv="bills" class="${legView==='bills'?'active':''}">Bills</button>
+      <button data-lv="questions" class="${legView==='questions'?'active':''}">Assembly &amp; Council Questions</button>
+    </div>
+    <div class="toolbar"><input type="search" id="legSearch" placeholder="${legView==='bills'?'Search bill title, session, notes...':'Search member, subject, question no...'}"></div>
+    <div id="legBody"><div class="empty-note">Loading…</div></div>`;
+  host().querySelectorAll('[data-lv]').forEach(b=>b.addEventListener('click', ()=>{ legView=b.dataset.lv; renderLegislative(); }));
+  document.getElementById('addLegBtn').addEventListener('click', ()=> legView==='bills' ? openBillModal() : openQuestionModal());
+  document.getElementById('legSearch').addEventListener('input', renderLegBody);
+  renderLegBody();
+}
+async function renderLegBody(){
+  const el = document.getElementById('legBody');
+  const searchQ = (document.getElementById('legSearch')?.value||'').toLowerCase();
+  if(legView==='bills'){
+    const { data: allBills, error } = await supa.from('legislative_bills').select('*, bill_versions(*)').order('title');
+    if(error){ el.innerHTML = `<div class="empty-note">Couldn't load bills (${escapeHtml(error.message)}).</div>`; return; }
+    const bills = allBills.filter(b => !searchQ || [b.title, b.session, (b.bill_versions||[]).map(v=>v.notes).join(' ')].join(' ').toLowerCase().includes(searchQ));
+    if(!bills.length){ el.innerHTML = `<div class="empty-note" style="margin-top:20px;">No bills match your search.</div>`; return; }
+    const cardsHtml = await Promise.all(bills.map(async b=>{
+      const versions = (b.bill_versions||[]).sort((a,b2)=>a.version-b2.version);
+      const billAtts = await fetchAttachmentsWithUrls('bill', b.id);
+      const versionsHtml = await Promise.all(versions.map(async v=>{
+        const vAtts = await fetchAttachmentsWithUrls('bill_version', v.id);
+        return `<div class="version-item"><div class="v-head">Version ${v.version} · ${fmtDate(v.date)}
+            ${versions.length>1 ? `<button class="link-btn danger" style="margin-left:8px;padding:0;" onclick="deleteBillVersion('${v.id}','${b.id}')">Delete version</button>` : ''}</div>
+          <div class="v-body">${escapeHtml(v.notes)}</div>
+          ${vAtts.length ? `<div style="margin-top:6px;">${attachmentsListWithDeleteHtml(vAtts, 'renderLegBody')}</div>` : ''}</div>`;
+      }));
+      return `<div class="tab-card purple" data-tab="${escapeHtml(b.session||'')}" style="margin-top:26px;"><div class="tab-card-body">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <h3 style="margin:0;font-family:var(--font-serif);font-size:1rem;">${escapeHtml(b.title)}</h3>
+          <span class="badge badge-purple">${escapeHtml(b.status)}</span>
+        </div>
+        <div class="small" style="margin:8px 0 4px;font-weight:700;">Bill-level documents</div>
+        ${attachmentsListWithDeleteHtml(billAtts, 'renderLegBody')}
+        <div class="small" style="margin:12px 0 4px;font-weight:700;">Draft versions</div>
+        ${versionsHtml.join('')}
+        <div class="row-actions" style="margin-top:10px;">
+          <button class="link-btn" onclick="openVersionModal('${b.id}')">+ Add new draft version</button>
+          <button class="link-btn danger" onclick="deleteBill('${b.id}')">Delete bill</button>
+        </div>
+      </div></div>`;
+    }));
+    el.innerHTML = cardsHtml.join('');
+  } else {
+    const { data: allQuestions, error } = await supa.from('legislative_questions').select('*').order('assembly_date', {ascending:false});
+    if(error){ el.innerHTML = `<div class="empty-note">Couldn't load questions (${escapeHtml(error.message)}).</div>`; return; }
+    const questions = allQuestions.filter(q => !searchQ || [q.member_name,q.subject,q.question_number,q.sequence_number].join(' ').toLowerCase().includes(searchQ));
+    const counts = await Promise.all(questions.map(q => supa.from('attachments').select('*', { count:'exact', head:true }).eq('owner_type','question').eq('owner_id', q.id)));
+    el.innerHTML = `<div class="table-wrap" style="margin-top:16px;"><table><thead><tr><th>Member</th><th>House</th><th>Date</th><th>Q. No.</th><th>Seq. No.</th><th>Subject</th><th>Docs</th><th>Status</th><th></th></tr></thead><tbody>
+      ${questions.length ? questions.map((q,i)=>`
+        <tr><td>${escapeHtml(q.member_name||'')}</td><td><span class="badge badge-navy">${q.house}</span></td><td class="small">${fmtDate(q.assembly_date)}</td>
+        <td class="mono">${escapeHtml(q.question_number||'')}</td><td class="mono">${escapeHtml(q.sequence_number||'')}</td><td>${escapeHtml(q.subject)}</td>
+        <td>${(counts[i].count||0) > 0 ? `<span class="badge badge-grey">📎 ${counts[i].count}</span>` : '<span class="small muted">—</span>'}</td>
+        <td><span class="badge ${q.status==='Answered'?'badge-green':(q.status==='Draft Received'?'badge-amber':'badge-grey')}">${q.status}</span></td>
+        <td class="row-actions"><button class="link-btn" onclick="openQuestionDetail('${q.id}')">View / edit</button><button class="link-btn danger" onclick="deleteQuestion('${q.id}')">Delete</button></td></tr>`).join('') : `<tr><td colspan="9" class="empty-note">No questions match your search.</td></tr>`}
+    </tbody></table></div>`;
+  }
+}
+function openBillModal(){
+  openModal(`<div class="modal-head"><h2>New bill</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field full"><label>Bill title</label><input id="blTitle"></div>
+      <div class="form-grid"><div class="field"><label>Session</label><input id="blSession" placeholder="e.g. Winter Session 2026"></div>
+      <div class="field"><label>Status</label><select id="blStatus"><option>Drafting</option><option>Ready for introduction</option><option>Introduced</option><option>Passed</option></select></div></div>
+      <div class="field full"><label>Initial draft notes</label><textarea id="blNotes" rows="3"></textarea></div>
+      <div class="field full"><label>Supporting documents (optional)</label><input type="file" id="blAttachments" multiple></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" id="saveBillBtn" onclick="saveBill()">Save bill</button></div>`);
+}
+async function saveBill(){
+  const title = document.getElementById('blTitle').value.trim(); if(!title){ showToast('Please enter a bill title.'); return; }
+  const btn = document.getElementById('saveBillBtn'); btn.disabled = true; btn.textContent = 'Saving…';
+  const { data: bill, error } = await supa.from('legislative_bills').insert({ title, session: document.getElementById('blSession').value.trim()||'—', status: document.getElementById('blStatus').value }).select().single();
+  if(error){ showToast('Could not save: ' + error.message); btn.disabled=false; btn.textContent='Save bill'; return; }
+  await supa.from('bill_versions').insert({ bill_id: bill.id, version: 1, date: offsetDate(0), notes: document.getElementById('blNotes').value.trim()||'—' });
+  const files = document.getElementById('blAttachments').files;
+  if(files && files.length) await uploadAttachmentsToStorage('bill', bill.id, files, STATE.currentUser.name);
+  logAudit('Logged bill: ' + title);
+  closeModal(); renderLegBody(); showToast('Bill logged.');
+}
+function openVersionModal(billId){
+  openModal(`<div class="modal-head"><h2>Add draft version</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Notes for this version</label><textarea id="vNotes" rows="4"></textarea></div>
+      <div class="field full"><label>Supporting documents (optional)</label><input type="file" id="vAttachments" multiple></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" id="saveVersionBtn" onclick="saveVersion('${billId}')">Add version</button></div>`);
+}
+async function saveVersion(billId){
+  const notes = document.getElementById('vNotes').value.trim(); if(!notes){ showToast('Please enter notes for this version.'); return; }
+  const btn = document.getElementById('saveVersionBtn'); btn.disabled = true; btn.textContent = 'Saving…';
+  const { count } = await supa.from('bill_versions').select('*', { count:'exact', head:true }).eq('bill_id', billId);
+  const { data: version, error } = await supa.from('bill_versions').insert({ bill_id: billId, version: (count||0)+1, date: offsetDate(0), notes }).select().single();
+  if(error){ showToast('Could not save: ' + error.message); btn.disabled=false; btn.textContent='Add version'; return; }
+  const files = document.getElementById('vAttachments').files;
+  if(files && files.length) await uploadAttachmentsToStorage('bill_version', version.id, files, STATE.currentUser.name);
+  logAudit('Added draft version ' + version.version + ' to a bill');
+  closeModal(); renderLegBody(); showToast('New draft version added.');
+}
+async function deleteBillVersion(versionId, billId){
+  if(!confirm('Delete this draft version? This cannot be undone.')) return;
+  const atts = await fetchAttachmentsWithUrls('bill_version', versionId);
+  if(atts.length){ await supa.storage.from(ATTACHMENTS_BUCKET).remove(atts.map(a=>a.storage_path)); await supa.from('attachments').delete().eq('owner_type','bill_version').eq('owner_id', versionId); }
+  const { error } = await supa.from('bill_versions').delete().eq('id', versionId);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted a bill draft version');
+  renderLegBody(); showToast('Draft version deleted.');
+}
+async function deleteBill(billId){
+  if(!confirm('Delete this entire bill, including all its draft versions and documents? This cannot be undone.')) return;
+  const versions = await supa.from('bill_versions').select('id').eq('bill_id', billId);
+  for(const ownerType of ['bill','bill_version']){
+    const relevantIds = ownerType==='bill' ? [billId] : (versions.data||[]).map(v=>v.id);
+    for(const oid of relevantIds){
+      const atts = await fetchAttachmentsWithUrls(ownerType, oid);
+      if(atts.length){ await supa.storage.from(ATTACHMENTS_BUCKET).remove(atts.map(a=>a.storage_path)); await supa.from('attachments').delete().eq('owner_type', ownerType).eq('owner_id', oid); }
+    }
+  }
+  const { error } = await supa.from('legislative_bills').delete().eq('id', billId); // bill_versions cascade automatically
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted a bill');
+  renderLegBody(); showToast('Bill deleted.');
+}
+function openQuestionModal(){
+  openModal(`<div class="modal-head"><h2>New legislature question</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <div class="field full"><label>Member name</label><input id="qMember" placeholder="e.g. Y. Satyanarayana, MLA"></div>
+      <div class="field"><label>House</label><select id="qHouse"><option>Assembly</option><option>Council</option></select></div>
+      <div class="field"><label>Date (day of assembly)</label><input type="date" id="qDate" value="${offsetDate(3)}"></div>
+      <div class="field"><label>Question number (legislature secretariat)</label><input id="qNum"></div>
+      <div class="field"><label>Sequence number (that day)</label><input id="qSeq"></div>
+      <div class="field full"><label>Subject</label><input id="qSubject"></div>
+      <div class="field full"><label>Details / Notes</label><textarea id="qNotes" rows="3" placeholder="Background, context, or anything worth noting about this question..."></textarea></div>
+      <div class="field full"><label>Supporting documents (optional)</label><input type="file" id="qAttachments" multiple></div>
+    </div></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" id="saveQBtn" onclick="saveQuestion()">Save question</button></div>`);
+}
+async function saveQuestion(){
+  const subject = document.getElementById('qSubject').value.trim(); if(!subject){ showToast('Please enter the subject.'); return; }
+  const btn = document.getElementById('saveQBtn'); btn.disabled = true; btn.textContent = 'Saving…';
+  const { data: q, error } = await supa.from('legislative_questions').insert({
+    member_name: document.getElementById('qMember').value.trim()||'—', house: document.getElementById('qHouse').value,
+    assembly_date: document.getElementById('qDate').value, question_number: document.getElementById('qNum').value.trim()||'—', sequence_number: document.getElementById('qSeq').value.trim()||'—',
+    subject, draft_answer:'', peshi_notes: document.getElementById('qNotes').value.trim(), status:'Pending Draft'
+  }).select().single();
+  if(error){ showToast('Could not save: ' + error.message); btn.disabled=false; btn.textContent='Save question'; return; }
+  const files = document.getElementById('qAttachments').files;
+  if(files && files.length) await uploadAttachmentsToStorage('question', q.id, files, STATE.currentUser.name);
+  logAudit('Logged legislature question: ' + subject);
+  closeModal(); renderLegBody(); showToast('Question logged.');
+}
+async function openQuestionDetail(id){
+  const [{ data: q, error }, atts] = await Promise.all([
+    supa.from('legislative_questions').select('*').eq('id', id).single(),
+    fetchAttachmentsWithUrls('question', id)
+  ]);
+  if(error || !q){ showToast('Could not load that question.'); return; }
+  openModal(`<div class="modal-head"><h2>${escapeHtml(q.subject)}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <p class="small" style="margin-top:0;">${escapeHtml(q.member_name||'')} · ${q.house} · ${fmtDate(q.assembly_date)} · Q.No ${escapeHtml(q.question_number||'')} · Seq ${escapeHtml(q.sequence_number||'')}</p>
+      <div class="field"><label>Draft answer received from department</label><textarea id="qDraftAnswer" rows="4">${escapeHtml(q.draft_answer||'')}</textarea></div>
+      <div class="field"><label>Details / Notes for Minister</label><textarea id="qPeshiNotes" rows="3">${escapeHtml(q.peshi_notes||'')}</textarea></div>
+      <div class="field"><label>Status</label><select id="qStatusSel"><option ${q.status==='Pending Draft'?'selected':''}>Pending Draft</option><option ${q.status==='Draft Received'?'selected':''}>Draft Received</option><option ${q.status==='Answered'?'selected':''}>Answered</option></select></div>
+      <div class="field full"><label>Supporting documents</label>${attachmentsListWithDeleteHtml(atts, 'openQuestionDetail', id)}</div>
+      <div class="field full"><label>Add more documents (optional)</label><input type="file" id="qAttachmentsAdd" multiple></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveQuestionDetail('${id}')">Save</button></div>`);
+}
+async function saveQuestionDetail(id){
+  const newFiles = document.getElementById('qAttachmentsAdd').files;
+  const { error } = await supa.from('legislative_questions').update({
+    draft_answer: document.getElementById('qDraftAnswer').value.trim(), peshi_notes: document.getElementById('qPeshiNotes').value.trim(), status: document.getElementById('qStatusSel').value
+  }).eq('id', id);
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  if(newFiles && newFiles.length) await uploadAttachmentsToStorage('question', id, newFiles, STATE.currentUser.name);
+  logAudit('Updated a legislature question');
+  closeModal(); renderLegBody(); showToast('Question updated.');
+}
+async function deleteQuestion(id){
+  if(!confirm('Delete this question, including its documents? This cannot be undone.')) return;
+  const atts = await fetchAttachmentsWithUrls('question', id);
+  if(atts.length){ await supa.storage.from(ATTACHMENTS_BUCKET).remove(atts.map(a=>a.storage_path)); await supa.from('attachments').delete().eq('owner_type','question').eq('owner_id', id); }
+  const { error } = await supa.from('legislative_questions').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted a legislature question');
+  renderLegBody(); showToast('Question deleted.');
+}
+
+/* =========================================================
+   10. REPRESENTATIONS (VIP only — no letter generation)
+========================================================= */
+function renderRepresentations(){
+  host().innerHTML = `
+    ${pageHead('Representations (VIP)','Representations received from VIPs (MLAs, MPs, MLCs) — recorded and tracked here. Public grievances are forwarded via the separate grievance portal.', `<button class="btn btn-marigold" id="addRepBtn">+ New representation</button>`)}
+    <div class="toolbar"><input type="search" id="repSearch" placeholder="Search VIP, subject, category, ULB/department, details..."></div>
+    <div class="table-wrap"><table><thead><tr><th>Received via (VIP)</th><th>Subject</th><th>Category</th><th>ULB / Department</th><th>Received</th><th>Docs</th><th>Status</th><th></th></tr></thead><tbody id="repTbody"><tr><td colspan="8" class="empty-note">Loading…</td></tr></tbody></table></div>`;
+  document.getElementById('addRepBtn').addEventListener('click', ()=>openRepModal());
+  document.getElementById('repSearch').addEventListener('input', renderRepTable);
+  renderRepTable();
+}
+async function renderRepTable(){
+  const tbody = document.getElementById('repTbody');
+  const q = (document.getElementById('repSearch')?.value||'').toLowerCase();
+  const { data: allData, error } = await supa.from('representations').select('*').order('date_received', {ascending:false});
+  if(error){ tbody.innerHTML = `<tr><td colspan="8" class="empty-note">Couldn't load representations (${escapeHtml(error.message)}).</td></tr>`; return; }
+  const data = allData.filter(r => !q || [r.vip,r.subject,r.category,r.ulb_dept,stripHtml(r.details)].join(' ').toLowerCase().includes(q));
+  const counts = await Promise.all(data.map(r => supa.from('attachments').select('*', { count:'exact', head:true }).eq('owner_type','representation').eq('owner_id', r.id)));
+  tbody.innerHTML = data.length ? data.map((r,i)=>`
+    <tr><td>${escapeHtml(r.vip)}</td><td>${escapeHtml(r.subject)}</td><td>${escapeHtml(r.category||'')}</td><td>${escapeHtml(r.ulb_dept||'')}</td><td class="mono">${fmtDate(r.date_received)}</td>
+    <td>${(counts[i].count||0) > 0 ? `<span class="badge badge-grey" style="cursor:pointer;" onclick="openRepDetail('${r.id}')">📎 ${counts[i].count}</span>` : '<span class="small muted">—</span>'}</td>
+    <td><select onchange="updateRepStatus('${r.id}', this.value)">${['Received','In Process','Resolved'].map(s=>`<option ${r.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
+    <td class="row-actions"><button class="link-btn" onclick="openRepDetail('${r.id}')">View / edit</button><button class="link-btn danger" onclick="deleteRepresentation('${r.id}')">Delete</button></td></tr>`).join('') : `<tr><td colspan="8" class="empty-note">No representations match your search.</td></tr>`;
+}
+async function openRepDetail(id){
+  const [{ data: r, error }, atts] = await Promise.all([
+    supa.from('representations').select('*').eq('id', id).single(),
+    fetchAttachmentsWithUrls('representation', id)
+  ]);
+  if(error || !r){ showToast('Could not load that representation.'); return; }
+  openModal(`<div class="modal-head"><h2>${escapeHtml(r.subject)}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <p class="small" style="margin-top:0;">${escapeHtml(r.vip)} · ${escapeHtml(r.category||'')} · ${escapeHtml(r.ulb_dept||'')} · Received ${fmtDate(r.date_received)}</p>
+      <div class="field full">
+        <label>Details / Notes</label>
+        ${rteToolbarHtml('rDetailDetails', false)}
+        <div id="rDetailDetails" class="rte" contenteditable="true" style="min-height:220px;max-height:420px;">${legacyTextToHtml(r.details)}</div>
+      </div>
+      <div class="field"><label>Status</label><select id="rDetailStatus">${['Received','In Process','Resolved'].map(s=>`<option ${r.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="field full"><label>Supporting documents</label>${attachmentsListWithDeleteHtml(atts, 'openRepDetail', id)}</div>
+      <div class="field full"><label>Add more documents (optional)</label><input type="file" id="rDetailAttachments" multiple></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveRepDetail('${id}')">Save</button></div>`, true);
+  setupAutosuggest(document.getElementById('rDetailDetails'));
+  setupSmartPaste(document.getElementById('rDetailDetails'));
+}
+async function saveRepDetail(id){
+  const details = document.getElementById('rDetailDetails').innerHTML;
+  const status = document.getElementById('rDetailStatus').value;
+  const { error } = await supa.from('representations').update({ details, status }).eq('id', id);
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  const newFiles = document.getElementById('rDetailAttachments').files;
+  if(newFiles && newFiles.length) await uploadAttachmentsToStorage('representation', id, newFiles, STATE.currentUser.name);
+  logAudit('Updated representation details');
+  closeModal(); renderRepTable(); showToast('Representation updated.');
+}
+async function updateRepStatus(id, val){
+  const { error } = await supa.from('representations').update({ status: val }).eq('id', id);
+  if(error){ showToast('Could not update: ' + error.message); return; }
+  logAudit('Updated a representation status to ' + val);
+  showToast('Status updated to "'+val+'".');
+}
+async function deleteRepresentation(id){
+  if(!confirm('Delete this representation, including its documents? This cannot be undone.')) return;
+  const atts = await fetchAttachmentsWithUrls('representation', id);
+  if(atts.length){ await supa.storage.from(ATTACHMENTS_BUCKET).remove(atts.map(a=>a.storage_path)); await supa.from('attachments').delete().eq('owner_type','representation').eq('owner_id', id); }
+  const { error } = await supa.from('representations').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted a representation');
+  renderRepTable(); showToast('Representation deleted.');
+}
+function openRepModal(){
+  openModal(`<div class="modal-head"><h2>New representation from VIP</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <div class="field full"><label>Received via (VIP name/designation)</label><input id="rVip" placeholder="e.g. MLA, Kakinada"></div>
+      <div class="field"><label>Category</label><select id="rCat"><option>Water Supply</option><option>Sanitation</option><option>Infrastructure</option><option>Housing</option><option>Other</option></select></div>
+      <div class="field full"><label>Subject</label><input id="rSubject"></div>
+    </div>
+    <div class="field full">
+      <label>Details / Notes</label>
+      ${rteToolbarHtml('rDetails', false)}
+      <div id="rDetails" class="rte" contenteditable="true" style="min-height:220px;max-height:420px;" data-placeholder="Background, context, or anything worth noting about this representation..."></div>
+    </div>
+    <div class="form-grid" style="margin-top:14px;">
+      <div class="field"><label>ULB / Department concerned</label><input id="rUlb" placeholder="e.g. Vijayawada Municipal Corporation"></div>
+      <div class="field"><label>Date received</label><input type="date" id="rDate" value="${offsetDate(0)}"></div>
+      <div class="field full"><label>Supporting documents (optional)</label><input type="file" id="rAttachments" multiple></div>
+    </div></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" id="saveRepBtn" onclick="saveRep()">Save</button></div>`, true);
+  setupAutosuggest(document.getElementById('rDetails'));
+  setupSmartPaste(document.getElementById('rDetails'));
+}
+async function saveRep(){
+  const vip = document.getElementById('rVip').value.trim(); const subject = document.getElementById('rSubject').value.trim();
+  if(!vip || !subject){ showToast('Please enter VIP name and subject.'); return; }
+  const btn = document.getElementById('saveRepBtn'); btn.disabled = true; btn.textContent = 'Saving…';
+  const { data: rep, error } = await supa.from('representations').insert({
+    vip, subject, category: document.getElementById('rCat').value, ulb_dept: document.getElementById('rUlb').value.trim(),
+    date_received: document.getElementById('rDate').value, details: document.getElementById('rDetails').innerHTML, status:'Received'
+  }).select().single();
+  if(error){ showToast('Could not save: ' + error.message); btn.disabled=false; btn.textContent='Save'; return; }
+  const files = document.getElementById('rAttachments').files;
+  if(files && files.length) await uploadAttachmentsToStorage('representation', rep.id, files, STATE.currentUser.name);
+  logAudit('Recorded representation: ' + subject);
+  closeModal(); renderRepTable(); showToast('Representation recorded.');
+}
+
+/* =========================================================
+   11. ADMIN & USER MANAGEMENT (unchanged)
+========================================================= */
+function renderAdmin(){
+  const ref = getSupabaseProjectRef();
+  const dashUrl = ref ? `https://supabase.com/dashboard/project/${ref}/auth/users` : 'https://supabase.com/dashboard';
+  host().innerHTML = `
+    ${pageHead('Admin & User Management','Assign roles for signed-in PSs, and review the activity/audit log.', `<a class="btn btn-ghost" href="${dashUrl}" target="_blank" rel="noopener">↗ Manage login accounts in Supabase</a>`)}
+    <p class="small">Adding or removing someone's ability to sign in is done from your Supabase dashboard (Authentication → Users), not from here — that keeps account creation/removal behind your own project login rather than inside this shared file. Once someone has signed in at least once, they appear below with the display name they chose; you (or they) can rename them here or from their own name in the sidebar.</p>
+    <div class="section-title">Users</div>
+    <div class="table-wrap"><table><thead><tr><th>Display Name</th><th>Role</th><th>Member since</th></tr></thead><tbody id="userTbody"><tr><td colspan="3" class="empty-note">Loading…</td></tr></tbody></table></div>
+    <div class="section-title">Activity / audit log</div>
+    <div class="tab-card" data-tab="Recent activity"><div class="tab-card-body" id="auditBody"><div class="empty-note">Loading…</div></div></div>`;
+  renderUserTable();
+  renderAuditLog();
+}
+async function renderUserTable(){
+  const tbody = document.getElementById('userTbody');
+  const { data, error } = await supa.from('profiles').select('*').order('created_at');
+  if(error){ tbody.innerHTML = `<tr><td colspan="3" class="empty-note">Couldn't load users (${escapeHtml(error.message)}).</td></tr>`; return; }
+  const roles = ['Super Admin','Editor (PS/OSD)','Data-Entry Staff','Read-only'];
+  tbody.innerHTML = data.length ? data.map(u=>`
+    <tr><td><input type="text" value="${escapeHtml(u.name)}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:4px;font-family:inherit;font-size:.83rem;"
+        onchange="updateUserName('${u.id}', this.value, '${escapeHtml(u.name)}')"></td>
+    <td><select onchange="updateUserRole('${u.id}', this.value, '${escapeHtml(u.name)}')">${roles.map(r=>`<option ${u.role===r?'selected':''}>${r}</option>`).join('')}</select></td>
+    <td class="small">${fmtDate(u.created_at)}</td></tr>`).join('') : `<tr><td colspan="3" class="empty-note">No one has signed in yet.</td></tr>`;
+}
+async function updateUserName(id, newName, oldName){
+  newName = newName.trim();
+  if(!newName){ showToast('Name cannot be empty.'); renderUserTable(); return; }
+  if(newName===oldName) return;
+  const { error } = await supa.from('profiles').update({ name: newName }).eq('id', id);
+  if(error){ showToast('Could not rename: ' + error.message); return; }
+  showToast(`Renamed "${oldName}" to "${newName}".`);
+  logAudit(`Renamed "${oldName}" to "${newName}"`);
+  if(STATE.currentUser && STATE.currentUser.id===id){
+    STATE.currentUser.name = newName;
+    document.getElementById('sbName').textContent = newName;
+    document.getElementById('sbAvatar').textContent = newName.charAt(0).toUpperCase();
+  }
+}
+async function updateUserRole(id, role, name){
+  const { error } = await supa.from('profiles').update({ role }).eq('id', id);
+  if(error){ showToast('Could not update role: ' + error.message); return; }
+  showToast(`Role updated for ${name}.`);
+  logAudit(`Set ${name}'s role to ${role}`);
+  if(STATE.currentUser && STATE.currentUser.id===id){ STATE.currentUser.roleLabel = role; document.getElementById('sbRole').textContent = role; }
+}
+async function renderAuditLog(){
+  const el = document.getElementById('auditBody');
+  const { data, error } = await supa.from('audit_log').select('*').order('happened_at', {ascending:false}).limit(50);
+  if(error){ el.innerHTML = `<div class="empty-note">Couldn't load the audit log (${escapeHtml(error.message)}).</div>`; return; }
+  el.innerHTML = data.length ? data.map(a=>`<div class="audit-log-item"><span class="who">${escapeHtml(a.who)}</span> — ${escapeHtml(a.action)}<div class="when">${fmtDateTime(a.happened_at)}</div></div>`).join('')
+    : `<div class="empty-note">No activity recorded yet.</div>`;
+}
+
+/* ---------------- init ---------------- */
+tickClock();
+
+/* =========================================================
+   MOBILE — collapsible sidebar drawer
+========================================================= */
+function openSidebar(){
+  document.querySelector('.sidebar').classList.add('open');
+  document.getElementById('sidebarBackdrop').classList.add('show');
+}
+function closeSidebar(){
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
+}
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.contains('open') ? closeSidebar() : openSidebar();
+}
+document.getElementById('hamburgerBtn').addEventListener('click', toggleSidebar);
+document.getElementById('sidebarBackdrop').addEventListener('click', closeSidebar);
+
+/* =========================================================
+   PWA — installability + service worker registration
+========================================================= */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
+}
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById('installAppBtn');
+  if(btn) btn.style.display = 'block';
+});
+document.getElementById('installAppBtn').addEventListener('click', async ()=>{
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  document.getElementById('installAppBtn').style.display = 'none';
+});
+window.addEventListener('appinstalled', ()=>{
+  const btn = document.getElementById('installAppBtn');
+  if(btn) btn.style.display = 'none';
+  showToast('PESHI installed — you can now open it from your home screen.');
+});
+</script>
+</body>
+</html>
