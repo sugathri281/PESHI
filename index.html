@@ -401,7 +401,7 @@ function fileSize(bytes){ if(bytes < 1024) return bytes+' B'; if(bytes < 1024*10
 
 /* ---------------- reference data for autosuggest / dropdowns ---------------- */
 const AP_ULB_NAMES = ['Vijayawada Municipal Corporation','Guntur Municipal Corporation','Tirupati Municipal Corporation','Kakinada Municipal Corporation','Rajahmundry Municipal Corporation','Nellore Municipal Corporation','Kurnool Municipal Corporation','Kadapa Municipal Corporation','Visakhapatnam Municipal Corporation','Anantapur Municipal Corporation','Eluru Municipal Corporation','Ongole Municipal Corporation'];
-const DEPARTMENTS = ['CDMA','PHEnC','DTCP','MEPMA','CRDA','Housing','Town Planning','Engineering','Vigilance'];
+const DEPARTMENTS = ['CDMA','PH Engineering','DTCP','MEPMA','CRDA','AGICL',"ADCL','TIDCO','SAC','APGBC'];
 const AUTOSUGGEST_DICTIONARY = [...new Set([
   ...AP_ULB_NAMES.join(' ').split(' '), ...DEPARTMENTS,
   'Commissioner','Engineer-in-Chief','Chief Engineer','Superintending Engineer','Executive Engineer','Deputy Executive Engineer','Assistant Engineer',
