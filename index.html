@@ -270,6 +270,8 @@ mark.action-flag{background:#FCE8B5;padding:0 2px;border-bottom:2px solid var(--
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#122736">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
@@ -370,14 +372,14 @@ if(!supa){
 const I18N = {
   en: {
     nav_home:"Home Dashboard", nav_calendar:"Calendar", nav_todo:"To-Dos",
-    nav_contacts:"Contacts Directory", nav_mom:"Meetings & MoM", nav_eoffice:"e-Office Files",
+    nav_contacts:"Contacts Directory", nav_mom:"Meetings & MoM", nav_eoffice:"e-Office Files", nav_documents:"Document Repository",
     nav_deadlines:"Deadlines & Works", nav_establishment:"Establishment Matters", nav_legislative:"Legislative Matters",
     nav_representations:"Representations (VIP)", nav_admin:"Admin & Users",
     group_ops:"Daily Operations", group_records:"Records & Tracking", group_vip:"VIP Relations", group_admin:"Administration"
   },
   te: {
     nav_home:"హోమ్ డాష్‌బోర్డ్", nav_calendar:"క్యాలెండర్", nav_todo:"టు-డూలు",
-    nav_contacts:"కాంటాక్ట్స్ డైరెక్టరీ", nav_mom:"సమావేశాలు & MoM", nav_eoffice:"ఇ-ఆఫీస్ ఫైళ్లు",
+    nav_contacts:"కాంటాక్ట్స్ డైరెక్టరీ", nav_mom:"సమావేశాలు & MoM", nav_eoffice:"ఇ-ఆఫీస్ ఫైళ్లు", nav_documents:"డాక్యుమెంట్ రిపాజిటరీ",
     nav_deadlines:"గడువులు & పనులు", nav_establishment:"స్థాపన వ్యవహారాలు", nav_legislative:"శాసనసభ వ్యవహారాలు",
     nav_representations:"ప్రతినిధిత్వాలు (VIP)", nav_admin:"అడ్మిన్ & వినియోగదారులు",
     group_ops:"రోజువారీ కార్యకలాపాలు", group_records:"రికార్డులు & ట్రాకింగ్", group_vip:"VIP సంబంధాలు", group_admin:"నిర్వహణ"
@@ -553,6 +555,7 @@ const NAV = [
   { group:'group_records', items:[
     {id:'mom', icon:'🗎', key:'nav_mom'},
     {id:'eoffice', icon:'📁', key:'nav_eoffice'},
+    {id:'documents', icon:'📑', key:'nav_documents'},
     {id:'deadlines', icon:'⏱', key:'nav_deadlines'},
     {id:'establishment', icon:'🗂', key:'nav_establishment'},
     {id:'legislative', icon:'⚖', key:'nav_legislative'},
@@ -694,7 +697,7 @@ function navigateTo(page){
   buildNav();
   document.getElementById('crumbTitle').textContent = document.querySelector(`.nav-item[data-page="${page}"] span:nth-child(2)`)?.textContent || page;
   const renderers = { home: renderHome, calendar: renderCalendar, todo: renderTodo, contacts: renderContacts,
-    mom: renderMom, eoffice: renderEoffice, deadlines: renderDeadlines, establishment: renderEstablishment,
+    mom: renderMom, eoffice: renderEoffice, documents: renderDocuments, deadlines: renderDeadlines, establishment: renderEstablishment,
     legislative: renderLegislative, representations: renderRepresentations, admin: renderAdmin };
   (renderers[page] || renderHome)();
 }
@@ -740,6 +743,12 @@ function subscribeToLiveUpdates(){
       if(currentPage==='home') refreshDashFiles();
       if(currentPage==='eoffice') renderEofficeBody();
       refreshNavBadges();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'documents' }, ()=>{
+      if(currentPage==='documents') renderDocumentsList();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'document_links' }, ()=>{
+      if(currentPage==='documents') renderDocumentsList();
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'deadlines' }, ()=>{
       if(currentPage==='home') refreshDashDeadlines();
@@ -1697,10 +1706,11 @@ async function saveMom(){
 }
 async function openMomDetail(id){
   currentMomDetailId = id;
-  const [{ data: m, error }, { data: items }, atts] = await Promise.all([
+  const [{ data: m, error }, { data: items }, atts, linkedDocsHtml] = await Promise.all([
     supa.from('meetings').select('*').eq('id', id).single(),
     supa.from('action_items').select('*').eq('meeting_id', id).order('deadline'),
-    fetchAttachmentsWithUrls('meeting', id)
+    fetchAttachmentsWithUrls('meeting', id),
+    fetchLinkedDocumentsHtml('meeting', id)
   ]);
   if(error || !m){ showToast('Could not load that meeting record.'); return; }
   currentMomData = m;
@@ -1728,6 +1738,7 @@ async function openMomDetail(id){
       ${attachmentsListWithDeleteHtml(atts, 'openMomDetail', id)}
       <div class="field full no-print" style="margin-top:12px;"><label>Add more documents</label><input type="file" id="mAddAttachments" multiple></div>
       <button class="btn btn-ghost btn-sm no-print" onclick="addMoreAttachments('${id}')">Upload</button>
+      ${linkedDocsHtml ? `<div class="no-print">${linkedDocsHtml}</div>` : ''}
     </div>
     <div class="modal-foot"><button class="btn btn-ghost no-print" onclick="closeModal()">Close</button><button class="btn btn-ghost no-print" onclick="openMomEditForm()">Edit</button><button class="btn btn-danger no-print" onclick="deleteMeeting('${id}')">Delete meeting</button><button class="btn btn-primary no-print" onclick="window.print()">🖶 Print / Save as PDF</button></div>`, true);
 }
@@ -1972,7 +1983,283 @@ async function saveFile(){
 }
 
 /* =========================================================
-   7. DEADLINE & WORKS TRACKER
+   7. DOCUMENT REPOSITORY
+========================================================= */
+const DOCUMENTS_BUCKET = 'documents';
+const DOCUMENT_MAX_SIZE = 2 * 1024 * 1024; // 2 MB
+const DOCUMENT_TYPE_ICONS = { pdf:'📕', doc:'📘', docx:'📘', xls:'📗', xlsx:'📗', ppt:'📙', pptx:'📙', png:'🖼', jpg:'🖼', jpeg:'🖼', gif:'🖼' };
+let documentsCache = [];
+let docFilterDept = '';
+let docFilterType = '';
+
+function fileExtOf(fileName){ const m = /\.([a-zA-Z0-9]+)$/.exec(fileName||''); return m ? m[1].toLowerCase() : ''; }
+function docTypeIcon(ext){ return DOCUMENT_TYPE_ICONS[ext] || '📄'; }
+function isPreviewablePdfOrImage(ext){ return ext==='pdf' || ['png','jpg','jpeg','gif'].includes(ext); }
+function isClientConvertible(ext){ return ext==='docx' || ext==='xlsx' || ext==='xls'; }
+
+function renderDocuments(){
+  host().innerHTML = `
+    ${pageHead('Document Repository','Upload, tag, and retrieve important documents — searchable by department, subject, and keywords.', `<button class="btn btn-marigold" id="uploadDocBtn">+ Upload document</button>`)}
+    <div class="toolbar">
+      <input type="search" id="docSearch" placeholder="Search title, subject, keywords, filename...">
+      <select id="docDeptFilter"><option value="">All departments</option>${DEPARTMENTS.map(d=>`<option>${d}</option>`).join('')}</select>
+      <select id="docTypeFilter"><option value="">All file types</option><option value="pdf">PDF</option><option value="docx">Word</option><option value="xlsx">Excel</option><option value="pptx">PowerPoint</option><option value="image">Image</option></select>
+      <input type="date" id="docDateFrom" title="From date">
+      <input type="date" id="docDateTo" title="To date">
+    </div>
+    <div id="documentsWrap"><div class="empty-note">Loading…</div></div>`;
+  document.getElementById('uploadDocBtn').addEventListener('click', ()=>openUploadDocumentModal());
+  ['docSearch','docDeptFilter','docTypeFilter','docDateFrom','docDateTo'].forEach(id=>document.getElementById(id).addEventListener('input', renderDocumentsList));
+  renderDocumentsList();
+}
+async function renderDocumentsList(){
+  const wrap = document.getElementById('documentsWrap');
+  const q = (document.getElementById('docSearch').value||'').toLowerCase();
+  const dept = document.getElementById('docDeptFilter').value;
+  const type = document.getElementById('docTypeFilter').value;
+  const dateFrom = document.getElementById('docDateFrom').value;
+  const dateTo = document.getElementById('docDateTo').value;
+  const { data, error } = await supa.from('documents').select('*').order('uploaded_at', {ascending:false});
+  if(error){ wrap.innerHTML = `<div class="empty-note">Couldn't load documents (${escapeHtml(error.message)}).</div>`; return; }
+  documentsCache = data;
+  const rows = data.filter(d=>{
+    const ext = fileExtOf(d.file_name);
+    const matchesType = !type || (type==='image' ? ['png','jpg','jpeg','gif'].includes(ext) : ext===type || (type==='docx'&&ext==='doc') || (type==='xlsx'&&ext==='xls') || (type==='pptx'&&ext==='ppt'));
+    const matchesDept = !dept || d.department===dept;
+    const matchesDate = (!dateFrom || d.uploaded_at.slice(0,10)>=dateFrom) && (!dateTo || d.uploaded_at.slice(0,10)<=dateTo);
+    const haystack = [d.title,d.subject,d.keywords,d.file_name].join(' ').toLowerCase();
+    return matchesType && matchesDept && matchesDate && (!q || haystack.includes(q));
+  });
+  wrap.innerHTML = rows.length ? `<div class="card-grid">${rows.map(d=>`
+    <div class="simple-card">
+      <span class="badge badge-navy" style="margin-bottom:6px;">${docTypeIcon(fileExtOf(d.file_name))} ${fileExtOf(d.file_name).toUpperCase()}${d.version_number>1?` · v${d.version_number}`:''}</span>
+      <h3>${escapeHtml(d.title)}</h3>
+      <div class="role">${escapeHtml(d.department||'')}${d.subject?' · '+escapeHtml(d.subject):''}</div>
+      ${d.keywords ? `<div class="line small">${d.keywords.split(',').map(k=>k.trim()).filter(Boolean).map(k=>`<span class="badge badge-grey" style="margin:2px 3px 0 0;">${escapeHtml(k)}</span>`).join('')}</div>` : ''}
+      <div class="line small muted" style="margin-top:6px;">${escapeHtml(d.file_name)} · ${fileSize(d.file_size)}</div>
+      <div class="line small muted">Uploaded by ${escapeHtml(d.uploaded_by||'')} · ${fmtDateTime(d.uploaded_at)}</div>
+      <div class="actions"><button class="link-btn" onclick="openDocumentDetail('${d.id}')">Open</button><button class="link-btn danger" onclick="deleteDocument('${d.id}')">Delete</button></div>
+    </div>`).join('')}</div>` : `<div class="empty-note">No documents match your search/filter.</div>`;
+}
+function openUploadDocumentModal(){
+  openModal(`
+    <div class="modal-head"><h2>Upload document</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field full"><label>Title</label><input id="docTitle" placeholder="e.g. DPR - Narasapuram Compost Yard"></div>
+      <div class="form-grid">
+        <div class="field"><label>Department</label><select id="docDept"><option value="">—</option>${DEPARTMENTS.map(d=>`<option>${d}</option>`).join('')}</select></div>
+        <div class="field"><label>Subject</label><input id="docSubject"></div>
+      </div>
+      <div class="field full"><label>Keywords (comma-separated)</label><input id="docKeywords" placeholder="e.g. land acquisition, dumping yard, RFCTLARR"></div>
+      <div class="field full"><label>File (max 2 MB)</label><input type="file" id="docFile"><div id="docFileWarning" class="small hidden" style="color:var(--red);margin-top:4px;">This file is larger than 2 MB. Please choose a smaller file.</div></div>
+      <div class="field full">
+        <label>Key Notes (optional)</label>
+        ${rteToolbarHtml('docNotes', false)}
+        <div id="docNotes" class="rte" contenteditable="true" data-placeholder="Important excerpts, context, or your own commentary on this document..."></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" id="saveDocBtn" onclick="saveNewDocument()">Upload</button></div>`, true);
+  setupSmartPaste(document.getElementById('docNotes'));
+  document.getElementById('docFile').addEventListener('change', function(){
+    const warn = document.getElementById('docFileWarning');
+    const tooBig = this.files[0] && this.files[0].size > DOCUMENT_MAX_SIZE;
+    warn.classList.toggle('hidden', !tooBig);
+    if(tooBig) this.value = '';
+  });
+}
+async function saveNewDocument(){
+  const title = document.getElementById('docTitle').value.trim();
+  const fileInput = document.getElementById('docFile');
+  const file = fileInput.files[0];
+  if(!title){ showToast('Please enter a title.'); return; }
+  if(!file){ showToast('Please choose a file to upload.'); return; }
+  if(file.size > DOCUMENT_MAX_SIZE){ showToast('File exceeds the 2 MB limit.'); return; }
+  const btn = document.getElementById('saveDocBtn'); btn.disabled = true; btn.textContent = 'Uploading…';
+  const path = `doc/${Date.now()}-${sanitizeFileName(file.name)}`;
+  const { error: upErr } = await supa.storage.from(DOCUMENTS_BUCKET).upload(path, file);
+  if(upErr){ showToast('Upload failed: ' + upErr.message); btn.disabled=false; btn.textContent='Upload'; return; }
+  const { error } = await supa.from('documents').insert({
+    title, department: document.getElementById('docDept').value, subject: document.getElementById('docSubject').value.trim(),
+    keywords: document.getElementById('docKeywords').value.trim(), notes_html: document.getElementById('docNotes').innerHTML,
+    file_name: file.name, file_size: file.size, file_type: fileExtOf(file.name), storage_path: path, version_number: 1,
+    uploaded_by: STATE.currentUser.name
+  });
+  if(error){ showToast('Could not save: ' + error.message); btn.disabled=false; btn.textContent='Upload'; return; }
+  logAudit('Uploaded document: ' + title);
+  closeModal(); renderDocumentsList(); showToast('Document uploaded.');
+}
+async function openDocumentDetail(id){
+  const d = documentsCache.find(x=>x.id===id) || (await supa.from('documents').select('*').eq('id', id).single()).data;
+  if(!d){ showToast('Could not load that document.'); return; }
+  const { data: signed } = await supa.storage.from(DOCUMENTS_BUCKET).createSignedUrl(d.storage_path, 3600);
+  const url = signed ? signed.signedUrl : null;
+  closeModal(); // replace any currently-open document modal (e.g. after uploading a new version) rather than stacking on top of it
+  openModal(`
+    <div class="modal-head"><h2>${escapeHtml(d.title)}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field"><label>Title</label><input id="ddTitle" value="${escapeHtml(d.title)}"></div>
+        <div class="field"><label>Department</label><select id="ddDept"><option value="">—</option>${DEPARTMENTS.map(dep=>`<option ${d.department===dep?'selected':''}>${dep}</option>`).join('')}</select></div>
+        <div class="field"><label>Subject</label><input id="ddSubject" value="${escapeHtml(d.subject||'')}"></div>
+        <div class="field"><label>Keywords</label><input id="ddKeywords" value="${escapeHtml(d.keywords||'')}"></div>
+      </div>
+      <div class="small muted" style="margin-bottom:10px;">${escapeHtml(d.file_name)} (v${d.version_number}) · ${fileSize(d.file_size)} · Uploaded by ${escapeHtml(d.uploaded_by||'')} · ${fmtDateTime(d.uploaded_at)}
+        ${url?`<a href="${url}" target="_blank" rel="noopener" style="margin-left:8px;">Download →</a>`:''}</div>
+      <div class="section-title" style="font-size:.9rem;">Preview</div>
+      <div id="docPreviewArea" style="border:1px solid var(--border);border-radius:var(--radius-s);padding:10px;min-height:60px;max-height:420px;overflow:auto;background:#fff;"><div class="small muted">Loading preview…</div></div>
+      <div class="row-actions no-print" style="margin:10px 0;"><label class="btn btn-ghost btn-sm" style="cursor:pointer;">⭱ Upload new version<input type="file" id="ddNewVersionFile" class="hidden" onchange="uploadNewVersion('${id}', this.files[0])"></label></div>
+      <div id="ddVersionHistory"></div>
+      <div class="section-title" style="font-size:.9rem;">Key Notes</div>
+      ${rteToolbarHtml('ddNotes', false)}
+      <div id="ddNotes" class="rte" contenteditable="true">${legacyTextToHtml(d.notes_html)}</div>
+      <div class="section-title" style="font-size:.9rem;">Linked records</div>
+      <div id="ddLinks"><div class="small muted">Loading…</div></div>
+      <button class="btn btn-ghost btn-sm no-print" style="margin-top:8px;" onclick="openLinkRecordModal('${id}')">+ Link to a Meeting, Bill, or Representation</button>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost no-print" onclick="closeModal()">Close</button><button class="btn btn-danger no-print" onclick="deleteDocument('${id}')" style="margin-right:auto;">Delete</button><button class="btn btn-primary no-print" onclick="saveDocumentDetail('${id}')">Save changes</button></div>`, true);
+  setupAutosuggest(document.getElementById('ddNotes'));
+  setupSmartPaste(document.getElementById('ddNotes'));
+  renderDocumentPreview(d, url, 'docPreviewArea');
+  renderVersionHistory(id);
+  renderLinkedRecords(id);
+}
+async function renderDocumentPreview(d, url, targetElId){
+  const area = document.getElementById(targetElId);
+  if(!area) return;
+  const ext = fileExtOf(d.file_name);
+  if(!url){ area.innerHTML = `<div class="small muted">Preview unavailable — could not generate a link to this file.</div>`; return; }
+  if(ext==='pdf'){
+    area.innerHTML = `<iframe src="${url}" style="width:100%;height:400px;border:none;"></iframe>`;
+    return;
+  }
+  if(['png','jpg','jpeg','gif'].includes(ext)){
+    area.innerHTML = `<img src="${url}" style="max-width:100%;max-height:400px;display:block;margin:0 auto;">`;
+    return;
+  }
+  if(ext==='docx' && window.mammoth){
+    try{
+      const resp = await fetch(url); const buf = await resp.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer: buf });
+      area.innerHTML = `<div class="small muted" style="margin-bottom:8px;">Read-only preview — formatting may differ slightly from the original file.</div>` + result.value;
+    } catch(e){ area.innerHTML = `<div class="small muted">Couldn't generate a preview for this file. Use Download above to view it.</div>`; }
+    return;
+  }
+  if((ext==='xlsx' || ext==='xls') && window.XLSX){
+    try{
+      const resp = await fetch(url); const buf = await resp.arrayBuffer();
+      const wb = XLSX.read(buf, { type:'array' });
+      const firstSheet = wb.SheetNames[0];
+      const html = XLSX.utils.sheet_to_html(wb.Sheets[firstSheet]);
+      area.innerHTML = `<div class="small muted" style="margin-bottom:8px;">Read-only preview of sheet "${escapeHtml(firstSheet)}"${wb.SheetNames.length>1?` (plus ${wb.SheetNames.length-1} more sheet(s) — download to view all)`:''}.</div>` + html;
+    } catch(e){ area.innerHTML = `<div class="small muted">Couldn't generate a preview for this file. Use Download above to view it.</div>`; }
+    return;
+  }
+  area.innerHTML = `<div class="small muted">Preview isn't available for .${escapeHtml(ext)} files. Use Download above to open it in the relevant application.</div>`;
+}
+async function saveDocumentDetail(id){
+  const payload = {
+    title: document.getElementById('ddTitle').value.trim(), department: document.getElementById('ddDept').value,
+    subject: document.getElementById('ddSubject').value.trim(), keywords: document.getElementById('ddKeywords').value.trim(),
+    notes_html: document.getElementById('ddNotes').innerHTML
+  };
+  if(!payload.title){ showToast('Please enter a title.'); return; }
+  const { error } = await supa.from('documents').update(payload).eq('id', id);
+  if(error){ showToast('Could not save: ' + error.message); return; }
+  logAudit('Updated document: ' + payload.title);
+  closeModal(); renderDocumentsList(); showToast('Document updated.');
+}
+async function uploadNewVersion(id, file){
+  if(!file) return;
+  if(file.size > DOCUMENT_MAX_SIZE){ showToast('File exceeds the 2 MB limit.'); return; }
+  const d = documentsCache.find(x=>x.id===id);
+  if(!d){ showToast('Could not find that document.'); return; }
+  await supa.from('document_versions').insert({ document_id:id, version_number:d.version_number, file_name:d.file_name, file_size:d.file_size, file_type:d.file_type, storage_path:d.storage_path, uploaded_by:d.uploaded_by, uploaded_at:d.uploaded_at });
+  const path = `doc/${Date.now()}-${sanitizeFileName(file.name)}`;
+  const { error: upErr } = await supa.storage.from(DOCUMENTS_BUCKET).upload(path, file);
+  if(upErr){ showToast('Upload failed: ' + upErr.message); return; }
+  const { error } = await supa.from('documents').update({ file_name:file.name, file_size:file.size, file_type:fileExtOf(file.name), storage_path:path, version_number:d.version_number+1, uploaded_by:STATE.currentUser.name, uploaded_at:new Date().toISOString() }).eq('id', id);
+  if(error){ showToast('Could not save new version: ' + error.message); return; }
+  logAudit('Uploaded a new version of: ' + d.title);
+  showToast('New version uploaded (v'+(d.version_number+1)+').');
+  openDocumentDetail(id);
+}
+async function renderVersionHistory(id){
+  const el = document.getElementById('ddVersionHistory');
+  if(!el) return;
+  const { data, error } = await supa.from('document_versions').select('*').eq('document_id', id).order('version_number', {ascending:false});
+  if(error || !data || !data.length){ el.innerHTML = ''; return; }
+  const withUrls = await Promise.all(data.map(async v=>{ const { data: signed } = await supa.storage.from(DOCUMENTS_BUCKET).createSignedUrl(v.storage_path, 3600); return { ...v, url: signed?signed.signedUrl:'#' }; }));
+  el.innerHTML = `<div class="small" style="font-weight:700;margin-bottom:4px;">Earlier versions</div>` + withUrls.map(v=>
+    `<div class="small muted">v${v.version_number} — <a href="${v.url}" target="_blank" rel="noopener">${escapeHtml(v.file_name)}</a> (${fileSize(v.file_size)}) · ${escapeHtml(v.uploaded_by||'')}, ${fmtDateTime(v.uploaded_at)}</div>`).join('');
+}
+function openLinkRecordModal(documentId){
+  openModal(`<div class="modal-head"><h2>Link to an existing record</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Record type</label><select id="linkType" onchange="loadLinkCandidates()"><option value="meeting">Meeting</option><option value="bill">Legislative Bill</option><option value="representation">Representation (VIP)</option></select></div>
+      <div class="field"><label>Search</label><input type="search" id="linkSearch" placeholder="Type to filter..." oninput="loadLinkCandidates()"></div>
+      <div id="linkCandidates"><div class="small muted">Loading…</div></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>`);
+  window.__linkDocumentId = documentId;
+  loadLinkCandidates();
+}
+async function loadLinkCandidates(){
+  const type = document.getElementById('linkType').value;
+  const q = (document.getElementById('linkSearch').value||'').toLowerCase();
+  const el = document.getElementById('linkCandidates');
+  const table = type==='meeting' ? 'meetings' : type==='bill' ? 'legislative_bills' : 'representations';
+  const labelField = type==='meeting' ? 'subject' : type==='bill' ? 'title' : 'subject';
+  const { data, error } = await supa.from(table).select('*');
+  if(error){ el.innerHTML = `<div class="small muted">Couldn't load records.</div>`; return; }
+  const rows = data.filter(r => !q || (r[labelField]||'').toLowerCase().includes(q)).slice(0,20);
+  el.innerHTML = rows.length ? rows.map(r=>`<div class="list-row" style="cursor:pointer;" onclick="saveDocumentLink('${type}','${r.id}', '${escapeHtml(r[labelField]).replace(/'/g,"\\'")}')"><div class="main-text">${escapeHtml(r[labelField])}</div></div>`).join('') : `<div class="small muted">No matching records.</div>`;
+}
+async function saveDocumentLink(type, linkedId, label){
+  const documentId = window.__linkDocumentId;
+  const { error } = await supa.from('document_links').insert({ document_id:documentId, linked_type:type, linked_id:linkedId, linked_label:label });
+  if(error){ showToast('Could not link: ' + error.message); return; }
+  logAudit('Linked a document to a ' + type + ': ' + label);
+  closeModal(); showToast('Linked.');
+  openDocumentDetail(documentId);
+}
+async function renderLinkedRecords(documentId){
+  const el = document.getElementById('ddLinks');
+  if(!el) return;
+  const { data, error } = await supa.from('document_links').select('*').eq('document_id', documentId);
+  if(error || !data || !data.length){ el.innerHTML = `<div class="small muted">Not linked to any records yet.</div>`; return; }
+  const pageFor = { meeting:'mom', bill:'legislative', representation:'representations' };
+  el.innerHTML = data.map(l=>`<div class="list-row"><div class="main-text">${l.linked_type==='meeting'?'🗎':l.linked_type==='bill'?'⚖':'✉'} ${escapeHtml(l.linked_label||'')} <span class="small muted">(${l.linked_type})</span></div>
+    <button class="link-btn" onclick="navigateTo('${pageFor[l.linked_type]}')">Open module</button>
+    <button class="link-btn danger" onclick="removeDocumentLink('${l.id}','${documentId}')">Unlink</button></div>`).join('');
+}
+async function removeDocumentLink(linkId, documentId){
+  const { error } = await supa.from('document_links').delete().eq('id', linkId);
+  if(error){ showToast('Could not remove link: ' + error.message); return; }
+  renderLinkedRecords(documentId);
+}
+async function deleteDocument(id){
+  if(!confirm('Delete this document, all its versions, and its links? This cannot be undone.')) return;
+  const d = documentsCache.find(x=>x.id===id) || (await supa.from('documents').select('*').eq('id', id).single()).data;
+  const { data: versions } = await supa.from('document_versions').select('storage_path').eq('document_id', id);
+  const pathsToRemove = [ d?.storage_path, ...(versions||[]).map(v=>v.storage_path) ].filter(Boolean);
+  if(pathsToRemove.length) await supa.storage.from(DOCUMENTS_BUCKET).remove(pathsToRemove);
+  await supa.from('document_links').delete().eq('document_id', id);
+  await supa.from('document_versions').delete().eq('document_id', id);
+  const { error } = await supa.from('documents').delete().eq('id', id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  logAudit('Deleted document: ' + (d?d.title:id));
+  closeModal(); renderDocumentsList(); showToast('Document deleted.');
+}
+async function fetchLinkedDocumentsHtml(linkedType, linkedId){
+  const { data, error } = await supa.from('document_links').select('*, documents(*)').eq('linked_type', linkedType).eq('linked_id', linkedId);
+  if(error || !data || !data.length) return '';
+  return `<div class="section-title" style="font-size:.9rem;">Linked Repository Documents</div>` +
+    data.filter(l=>l.documents).map(l=>`<div class="list-row"><div class="main-text">${docTypeIcon(fileExtOf(l.documents.file_name))} ${escapeHtml(l.documents.title)}</div>
+      <button class="link-btn no-print" onclick="closeModal(); navigateTo('documents'); setTimeout(()=>openDocumentDetail('${l.documents.id}'), 300);">Open</button></div>`).join('');
+}
+
+/* =========================================================
+   8. DEADLINE & WORKS TRACKER
 ========================================================= */
 let deadlineView = 'table';
 const STAGES = ['Technical Sanction','Administrative Sanction','Tender Floated','Tender Closing','Technical Bid Opening','Financial Bid Opening','Letter of Acceptance','Work Closure'];
@@ -2270,6 +2557,7 @@ async function renderLegBody(){
     const cardsHtml = await Promise.all(bills.map(async b=>{
       const versions = (b.bill_versions||[]).sort((a,b2)=>a.version-b2.version);
       const billAtts = await fetchAttachmentsWithUrls('bill', b.id);
+      const linkedDocsHtml = await fetchLinkedDocumentsHtml('bill', b.id);
       const versionsHtml = await Promise.all(versions.map(async v=>{
         const vAtts = await fetchAttachmentsWithUrls('bill_version', v.id);
         return `<div class="version-item"><div class="v-head">Version ${v.version} · ${fmtDate(v.date)}
@@ -2286,6 +2574,7 @@ async function renderLegBody(){
         ${attachmentsListWithDeleteHtml(billAtts, 'renderLegBody')}
         <div class="small" style="margin:12px 0 4px;font-weight:700;">Draft versions</div>
         ${versionsHtml.join('')}
+        ${linkedDocsHtml || ''}
         <div class="row-actions" style="margin-top:10px;">
           <button class="link-btn" onclick="openVersionModal('${b.id}')">+ Add new draft version</button>
           <button class="link-btn danger" onclick="deleteBill('${b.id}')">Delete bill</button>
@@ -2464,9 +2753,10 @@ async function renderRepTable(){
     <td class="row-actions"><button class="link-btn" onclick="openRepDetail('${r.id}')">View / edit</button><button class="link-btn danger" onclick="deleteRepresentation('${r.id}')">Delete</button></td></tr>`).join('') : `<tr><td colspan="8" class="empty-note">No representations match your search.</td></tr>`;
 }
 async function openRepDetail(id){
-  const [{ data: r, error }, atts] = await Promise.all([
+  const [{ data: r, error }, atts, linkedDocsHtml] = await Promise.all([
     supa.from('representations').select('*').eq('id', id).single(),
-    fetchAttachmentsWithUrls('representation', id)
+    fetchAttachmentsWithUrls('representation', id),
+    fetchLinkedDocumentsHtml('representation', id)
   ]);
   if(error || !r){ showToast('Could not load that representation.'); return; }
   openModal(`<div class="modal-head"><h2>${escapeHtml(r.subject)}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
@@ -2480,6 +2770,7 @@ async function openRepDetail(id){
       <div class="field"><label>Status</label><select id="rDetailStatus">${['Received','In Process','Resolved'].map(s=>`<option ${r.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
       <div class="field full"><label>Supporting documents</label>${attachmentsListWithDeleteHtml(atts, 'openRepDetail', id)}</div>
       <div class="field full"><label>Add more documents (optional)</label><input type="file" id="rDetailAttachments" multiple></div>
+      ${linkedDocsHtml ? `<div>${linkedDocsHtml}</div>` : ''}
     </div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveRepDetail('${id}')">Save</button></div>`, true);
   setupAutosuggest(document.getElementById('rDetailDetails'));
