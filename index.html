@@ -27,7 +27,7 @@ button{font-family:inherit;}
 ::selection{background:var(--marigold-tint);}
 a{color:var(--navy);}
 :focus-visible{outline:2px solid var(--marigold-dark);outline-offset:2px;}
-.hidden{display:none !important;}
+.hidden{display:none !important;}f
 .small{font-size:.78rem;color:var(--ink-soft);}
 .muted{color:var(--ink-faint);}
 .mono{font-family:var(--font-mono);}
@@ -401,7 +401,7 @@ function fileSize(bytes){ if(bytes < 1024) return bytes+' B'; if(bytes < 1024*10
 
 /* ---------------- reference data for autosuggest / dropdowns ---------------- */
 const AP_ULB_NAMES = ['Vijayawada Municipal Corporation','Guntur Municipal Corporation','Tirupati Municipal Corporation','Kakinada Municipal Corporation','Rajahmundry Municipal Corporation','Nellore Municipal Corporation','Kurnool Municipal Corporation','Kadapa Municipal Corporation','Visakhapatnam Municipal Corporation','Anantapur Municipal Corporation','Eluru Municipal Corporation','Ongole Municipal Corporation'];
-const DEPARTMENTS = ['CDMA','PH Engineering','DTCP','MEPMA','CRDA','AGICL',"ADCL','TIDCO','SAC','APGBC'];
+const DEPARTMENTS = ['CDMA','PH Engineering','DTCP','MEPMA','CRDA','AGICL','ADCL','TIDCO','SAC','APGBC'];
 const AUTOSUGGEST_DICTIONARY = [...new Set([
   ...AP_ULB_NAMES.join(' ').split(' '), ...DEPARTMENTS,
   'Commissioner','Engineer-in-Chief','Chief Engineer','Superintending Engineer','Executive Engineer','Deputy Executive Engineer','Assistant Engineer',
