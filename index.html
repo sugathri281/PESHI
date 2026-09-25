@@ -402,6 +402,24 @@ function telHref(phone){
   const plus = cleaned.startsWith('+') ? '+' : '';
   return plus + cleaned.replace(/[^0-9]/g, '');
 }
+function waHref(phone){
+  // wa.me needs the full international number as digits only — no "+",
+  // no spaces. It opens a WhatsApp chat with that number; WhatsApp has no
+  // public link that jumps straight into a voice call, so from there the
+  // user places the call themselves with one more tap, inside WhatsApp.
+  return 'https://wa.me/' + String(phone||'').replace(/[^0-9]/g, '');
+}
+function openCallOptionsModal(phone){
+  const tel = telHref(phone), wa = waHref(phone);
+  if(!tel){ showToast('This number doesn\'t look valid — please check it in Edit.'); return; }
+  openModal(`
+    <div class="modal-head"><h2>Contact ${escapeHtml(phone)}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:10px;">
+      <a href="tel:${tel}" class="btn btn-primary btn-block" style="text-decoration:none;text-align:center;" onclick="closeModal()">📞 Call</a>
+      <a href="${wa}" target="_blank" rel="noopener" class="btn btn-ghost btn-block" style="text-decoration:none;text-align:center;" onclick="closeModal()">💬 Open in WhatsApp</a>
+      <p class="small muted" style="margin:2px 0 0;">WhatsApp opens a chat with this number — place the call from inside WhatsApp with one more tap.</p>
+    </div>`);
+}
 function stripHtml(html){ const d = document.createElement('div'); d.innerHTML = html || ''; return d.textContent || ''; }
 function showToast(msg){ const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(showToast._t); showToast._t = setTimeout(()=>el.classList.remove('show'), 2800); }
 function downloadText(filename, text){ const blob = new Blob([text], {type:'text/plain'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href); }
@@ -1481,8 +1499,8 @@ async function renderContactGrid(){
       <div class="role">${escapeHtml(c.designation||'')}</div>
       <div class="line">${escapeHtml(c.jurisdiction||'')}</div>
       ${c.hod_name?`<div class="line">HoD: ${escapeHtml(c.hod_name)}</div>`:''}
-      <div class="line">📞 <a href="tel:${telHref(c.phone)}">${escapeHtml(c.phone||'')}</a></div>
-      ${c.alternate_phone?`<div class="line">📞 <a href="tel:${telHref(c.alternate_phone)}">${escapeHtml(c.alternate_phone)}</a> <span class="small muted">(alt)</span></div>`:''}
+      <div class="line">📞 <a href="#" onclick="event.preventDefault(); openCallOptionsModal('${escapeHtml(c.phone||'')}')">${escapeHtml(c.phone||'')}</a></div>
+      ${c.alternate_phone?`<div class="line">📞 <a href="#" onclick="event.preventDefault(); openCallOptionsModal('${escapeHtml(c.alternate_phone)}')">${escapeHtml(c.alternate_phone)}</a> <span class="small muted">(alt)</span></div>`:''}
       ${c.email?`<div class="line">✉ ${escapeHtml(c.email)}</div>`:''}
       ${c.notes?`<div class="line small" style="margin-top:6px;">${escapeHtml(c.notes)}</div>`:''}
       <div class="actions"><button class="link-btn" onclick="openContactModal('${c.id}')">Edit</button><button class="link-btn danger" onclick="deleteContact('${c.id}')">Delete</button></div>
