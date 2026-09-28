@@ -693,7 +693,7 @@ let navBadgeCounts = { deadlines: 0, eoffice: 0, establishment: 0 };
 async function refreshNavBadges(){
   const [{ data: openDeadlines }, { count: importantCount }] = await Promise.all([
     supa.from('deadlines').select('due_date').eq('status','Open'),
-    supa.from('eoffice_files').select('*', { count:'exact', head:true }).eq('category','Important'),
+    supa.from('eoffice_files').select('*', { count:'exact', head:true }).eq('category','Important').eq('is_done', false),
   ]);
   const overdueCount = (openDeadlines||[]).filter(d => daysUntil(d.due_date) < 0).length;
   navBadgeCounts = { deadlines: overdueCount, eoffice: importantCount||0 };
@@ -1145,16 +1145,13 @@ async function renderHome(){
 async function refreshDashFiles(){
   const filesEl = document.getElementById('dashFiles');
   if(!filesEl) return;
-  const { data, error } = await supa.from('eoffice_files').select('*');
+  // Open (not-done) files only, most recently modified first — same ordering as the e-Office module itself.
+  const { data, error } = await supa.from('eoffice_files').select('*').eq('is_done', false).order('updated_at', {ascending:false}).limit(5);
   if(error){ filesEl.innerHTML = `<div class="empty-note">Couldn't load files (${escapeHtml(error.message)}).</div>`; return; }
-  const recent = data
-    .map(f => ({ ...f, sortDate: f.category==='Important' ? f.last_moved : f.received_on }))
-    .filter(f => f.sortDate)
-    .sort((a,b) => b.sortDate.localeCompare(a.sortDate))
-    .slice(0,5);
+  const recent = data;
   filesEl.innerHTML = (recent.length ? recent.map(f=>`
     <div class="list-row"><div><div class="main-text"><span class="mono small">${escapeHtml(f.file_number||'')}</span> — ${escapeHtml(f.subject)}</div><div class="meta">${escapeHtml(f.department||'')} · ${f.category==='Important' ? escapeHtml(f.status||'') : 'Routine'}</div></div></div>`).join('')
-    : `<div class="empty-note">No e-Office files logged yet.</div>`) + `<div style="margin-top:10px;"><button class="link-btn" onclick="navigateTo('eoffice')">Open e-Office tracker →</button></div>`;
+    : `<div class="empty-note">No open e-Office files.</div>`) + `<div style="margin-top:10px;"><button class="link-btn" onclick="navigateTo('eoffice')">Open e-Office tracker →</button></div>`;
 }
 async function refreshDashDeadlines(){
   const ddEl = document.getElementById('dashDeadlines');
@@ -1917,36 +1914,58 @@ function renderEoffice(){
       <button data-ev="important" class="${eofficeView==='important'?'active':''}">Important / Cabinet Files</button>
       <button data-ev="routine" class="${eofficeView==='routine'?'active':''}">Routine Files</button>
     </div>
-    <div class="toolbar"><input type="search" id="eSearch" placeholder="Search file number or subject..."></div>
+    <div class="toolbar">
+      <input type="search" id="eSearch" placeholder="Search file number or subject...">
+      <select id="eStatusFilter"><option value="Open" selected>Open</option><option value="Done">Done</option><option value="">All statuses</option></select>
+    </div>
     <div id="eBody"><div class="empty-note">Loading…</div></div>`;
   document.getElementById('addFileBtn').addEventListener('click', ()=>openFileModal());
   host().querySelectorAll('[data-ev]').forEach(b=>b.addEventListener('click', ()=>{ eofficeView=b.dataset.ev; renderEofficeBody(); }));
   document.getElementById('eSearch').addEventListener('input', renderEofficeBody);
+  document.getElementById('eStatusFilter').addEventListener('change', renderEofficeBody);
   renderEofficeBody();
 }
 async function renderEofficeBody(){
   const q = (document.getElementById('eSearch').value||'').toLowerCase();
   const el = document.getElementById('eBody');
   host().querySelectorAll('[data-ev]').forEach(b=>b.classList.toggle('active', b.dataset.ev===eofficeView));
-  const { data, error } = await supa.from('eoffice_files').select('*').eq('category', eofficeView==='important'?'Important':'Routine').order('file_number');
+  const sf = document.getElementById('eStatusFilter').value; // 'Open' | 'Done' | '' (all)
+  // Most recently modified first (not by file number).
+  const { data, error } = await supa.from('eoffice_files').select('*').eq('category', eofficeView==='important'?'Important':'Routine').order('updated_at', {ascending:false});
   if(error){ el.innerHTML = `<div class="empty-note">Couldn't load files (${escapeHtml(error.message)}).</div>`; return; }
   eofficeCache = data;
-  const rows = data.filter(f => !q || [f.file_number,f.subject,f.department].join(' ').toLowerCase().includes(q));
+  const rows = data.filter(f => {
+    const matchesStatus = !sf || (sf==='Done' ? !!f.is_done : !f.is_done);
+    const matchesSearch = !q || [f.file_number,f.subject,f.department].join(' ').toLowerCase().includes(q);
+    return matchesStatus && matchesSearch;
+  });
   const previewOf = html => { const t = stripHtml(html||''); return t ? (t.length>90 ? escapeHtml(t.slice(0,90))+'…' : escapeHtml(t)) : '<span class="small muted">No summary yet.</span>'; };
+  const fileNoCell = f => `<td class="mono">${escapeHtml(f.file_number||'')}${f.is_done?`<div class="small muted">Done${f.done_at?' '+fmtDate(f.done_at):''}</div>`:''}</td>`;
+  const actionsCell = f => `<td class="row-actions">${f.is_done
+    ? `<button class="link-btn" onclick="toggleEofficeDone('${f.id}', false)">Reopen</button>`
+    : `<button class="link-btn" onclick="toggleEofficeDone('${f.id}', true)">Mark done</button>`}<button class="link-btn" onclick="openFileDetailModal('${f.id}')">View / Edit</button><button class="link-btn danger" onclick="deleteEofficeFile('${f.id}')">Delete</button></td>`;
   if(eofficeView==='important'){
     el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>File No.</th><th>Subject</th><th>Department</th><th>Status</th><th>Last moved</th><th>Summary of file contents</th><th></th></tr></thead><tbody>
       ${rows.length ? rows.map(f=>`
-        <tr><td class="mono">${escapeHtml(f.file_number||'')}</td><td>${escapeHtml(f.subject)}</td><td>${escapeHtml(f.department||'')}</td><td>${escapeHtml(f.status||'')}</td>
+        <tr>${fileNoCell(f)}<td>${escapeHtml(f.subject)}</td><td>${escapeHtml(f.department||'')}</td><td>${escapeHtml(f.status||'')}</td>
         <td class="small">${f.last_moved?fmtDate(f.last_moved):''}</td>
         <td style="max-width:260px;">${previewOf(f.remarks)}</td>
-        <td class="row-actions"><button class="link-btn" onclick="openFileDetailModal('${f.id}')">View / Edit</button><button class="link-btn danger" onclick="deleteEofficeFile('${f.id}')">Delete</button></td></tr>`).join('') : `<tr><td colspan="7" class="empty-note">No important files match your search.</td></tr>`}
+        ${actionsCell(f)}</tr>`).join('') : `<tr><td colspan="7" class="empty-note">No important files match your search or filter.</td></tr>`}
     </tbody></table></div>`;
   } else {
     el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>File No.</th><th>Subject</th><th>Department</th><th>Received on</th><th>Summary of file contents</th><th></th></tr></thead><tbody>
-      ${rows.length ? rows.map(f=>`<tr><td class="mono">${escapeHtml(f.file_number||'')}</td><td>${escapeHtml(f.subject)}</td><td>${escapeHtml(f.department||'')}</td><td class="small">${f.received_on?fmtDate(f.received_on):''}</td><td style="max-width:320px;">${previewOf(f.summary)}</td>
-        <td class="row-actions"><button class="link-btn" onclick="openFileDetailModal('${f.id}')">View / Edit</button><button class="link-btn danger" onclick="deleteEofficeFile('${f.id}')">Delete</button></td></tr>`).join('') : `<tr><td colspan="6" class="empty-note">No routine files match your search.</td></tr>`}
+      ${rows.length ? rows.map(f=>`<tr>${fileNoCell(f)}<td>${escapeHtml(f.subject)}</td><td>${escapeHtml(f.department||'')}</td><td class="small">${f.received_on?fmtDate(f.received_on):''}</td><td style="max-width:320px;">${previewOf(f.summary)}</td>
+        ${actionsCell(f)}</tr>`).join('') : `<tr><td colspan="6" class="empty-note">No routine files match your search or filter.</td></tr>`}
     </tbody></table></div>`;
   }
+}
+async function toggleEofficeDone(id, makeDone){
+  const f = eofficeCache.find(x=>x.id===id);
+  const { error } = await supa.from('eoffice_files').update({ is_done: makeDone, done_at: makeDone ? new Date().toISOString() : null }).eq('id', id);
+  if(error){ showToast('Could not update: ' + error.message); return; }
+  logAudit((makeDone ? 'Marked done' : 'Reopened') + ' e-Office file: ' + (f ? f.subject : id));
+  renderEofficeBody(); refreshNavBadges();
+  showToast(makeDone ? 'File marked done — find it any time under the "Done" filter.' : 'File reopened.');
 }
 function openFileDetailModal(id){
   const f = eofficeCache.find(x=>x.id===id);
